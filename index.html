@@ -1,0 +1,2010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FortiSOAR Playbook Converter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #141937;
+            --bg-tertiary: #1a1f3a;
+            --accent-primary: #00d9ff;
+            --accent-secondary: #7b61ff;
+            --text-primary: #e4e4e7;
+            --text-secondary: #a1a1aa;
+            --success: #22c55e;
+            --warning: #eab308;
+            --error: #ef4444;
+            --border: #2a2f4a;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border-radius: 16px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+        }
+
+        .direction-selector {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .direction-btn {
+            flex: 1;
+            max-width: 300px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .direction-btn:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+        }
+
+        .direction-btn.active {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-color: var(--accent-primary);
+        }
+
+        .direction-btn h3 {
+            font-size: 1.3em;
+            margin-bottom: 5px;
+        }
+
+        .direction-btn p {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+
+        .direction-btn.active p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .upload-section {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .file-drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--bg-tertiary);
+        }
+
+        .file-drop-zone:hover,
+        .file-drop-zone.dragover {
+            border-color: var(--accent-primary);
+            background: rgba(0, 217, 255, 0.05);
+        }
+
+        .file-drop-zone .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.6;
+        }
+
+        .file-drop-zone h3 {
+            font-size: 1.2em;
+            margin-bottom: 8px;
+        }
+
+        .file-drop-zone p {
+            color: var(--text-secondary);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .editor-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .editor-panel {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .editor-header h2 {
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-fsr {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--error);
+        }
+
+        .badge-fas {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        textarea {
+            flex: 1;
+            width: 100%;
+            min-height: 500px;
+            padding: 15px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 13px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        textarea:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        textarea::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: inherit;
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 217, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--bg-secondary);
+            border-color: var(--accent-primary);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
+        }
+
+        .status {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideDown 0.3s ease;
+            border-left: 4px solid;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+
+        .status-success {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        .status-info {
+            background: rgba(0, 217, 255, 0.1);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .stats-grid {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .info-panel {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            display: none;
+        }
+
+        .info-panel h3 {
+            margin-bottom: 15px;
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-panel ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-panel li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .info-panel li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        details {
+            margin-top: 15px;
+        }
+
+        summary {
+            cursor: pointer;
+            padding: 10px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            font-weight: 600;
+            user-select: none;
+        }
+
+        summary:hover {
+            background: var(--bg-primary);
+        }
+
+        details[open] summary {
+            margin-bottom: 15px;
+        }
+
+        .detail-content {
+            padding: 15px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        .warning-box {
+            background: rgba(234, 179, 8, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .warning-box h4 {
+            color: var(--warning);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (max-width: 1024px) {
+            .editor-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .direction-selector {
+                flex-direction: column;
+            }
+
+            .direction-btn {
+                max-width: 100%;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>FortiSOAR Playbook Converter</h1>
+            <p>Seamless conversion between FSR and FAS formats</p>
+        </div>
+
+        <div class="direction-selector">
+            <div class="direction-btn active" id="fsrToFasBtn" onclick="setDirection('fsr-to-fas')">
+                <h3>FSR → FAS</h3>
+                <p>Convert FortiSOAR to Cloud Platform</p>
+            </div>
+            <div class="direction-btn" id="fasToFsrBtn" onclick="setDirection('fas-to-fsr')">
+                <h3>FAS → FSR</h3>
+                <p>Convert Cloud Platform to FortiSOAR</p>
+            </div>
+        </div>
+
+        <div id="detectionBanner" class="info-panel" style="display: none; background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(123, 97, 255, 0.1)); border-color: var(--accent-primary);">
+            <h3>Auto-Detection</h3>
+            <p id="detectionText" style="color: var(--text-secondary); margin-top: 10px;"></p>
+        </div>
+
+        <div class="upload-section">
+            <div class="file-drop-zone" id="dropZone">
+                <div class="icon">📁</div>
+                <h3>Drop your JSON file here</h3>
+                <p>or click to browse</p>
+                <input type="file" id="fileInput" accept=".json">
+            </div>
+        </div>
+
+        <div class="editor-section">
+            <div class="editor-panel">
+                <div class="editor-header">
+                    <h2>
+                        <span>Input</span>
+                        <span class="badge badge-fsr" id="inputBadge">FSR</span>
+                    </h2>
+                </div>
+                <textarea id="inputText" placeholder="Paste your JSON here or upload a file..."></textarea>
+            </div>
+
+            <div class="editor-panel">
+                <div class="editor-header">
+                    <h2>
+                        <span>Output</span>
+                        <span class="badge badge-fas" id="outputBadge">FAS</span>
+                    </h2>
+                </div>
+                <textarea id="outputText" disabled placeholder="Converted output will appear here..."></textarea>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn-primary" id="convertBtn">
+                <span>🔄</span>
+                <span id="convertBtnText">Convert FSR → FAS</span>
+            </button>
+            <button class="btn-success" id="downloadBtn" disabled>
+                <span>💾</span>
+                <span>Download JSON</span>
+            </button>
+            <button class="btn-secondary" id="copyBtn" disabled>
+                <span>📋</span>
+                <span>Copy</span>
+            </button>
+            <button class="btn-secondary" id="clearBtn">
+                <span>🗑️</span>
+                <span>Clear</span>
+            </button>
+        </div>
+
+        <div id="statusMsg" class="status"></div>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-value" id="statCollections">0</div>
+                <div class="stat-label">Collections</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statPlaybooks">0</div>
+                <div class="stat-label">Playbooks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statSteps">0</div>
+                <div class="stat-label">Steps</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statRoutes">0</div>
+                <div class="stat-label">Routes</div>
+            </div>
+        </div>
+
+        <div class="info-panel" id="conversionInfo"></div>
+        <div class="info-panel" id="validationInfo"></div>
+    </div>
+
+    <script>
+        let currentDirection = 'fsr-to-fas';
+
+        // UI Elements
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const inputText = document.getElementById('inputText');
+        const outputText = document.getElementById('outputText');
+        const convertBtn = document.getElementById('convertBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const statusMsg = document.getElementById('statusMsg');
+        const statsGrid = document.getElementById('statsGrid');
+        const inputBadge = document.getElementById('inputBadge');
+        const outputBadge = document.getElementById('outputBadge');
+        const convertBtnText = document.getElementById('convertBtnText');
+
+        // Direction selection
+        function setDirection(direction) {
+            currentDirection = direction;
+            
+            document.getElementById('fsrToFasBtn').classList.toggle('active', direction === 'fsr-to-fas');
+            document.getElementById('fasToFsrBtn').classList.toggle('active', direction === 'fas-to-fsr');
+            
+            if (direction === 'fsr-to-fas') {
+                inputBadge.textContent = 'FSR';
+                inputBadge.className = 'badge badge-fsr';
+                outputBadge.textContent = 'FAS';
+                outputBadge.className = 'badge badge-fas';
+                convertBtnText.textContent = 'Convert FSR → FAS';
+            } else {
+                inputBadge.textContent = 'FAS';
+                inputBadge.className = 'badge badge-fas';
+                outputBadge.textContent = 'FSR';
+                outputBadge.className = 'badge badge-fsr';
+                convertBtnText.textContent = 'Convert FAS → FSR';
+            }
+            
+            // Don't clear if we're auto-detecting, only on manual change
+            const hasContent = inputText.value.trim().length > 0;
+            if (!hasContent) {
+                clearAll();
+            } else {
+                // Just hide the detection banner on manual switch
+                document.getElementById('detectionBanner').style.display = 'none';
+            }
+        }
+
+        // File handling
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type === 'application/json') {
+                loadFile(file);
+            } else {
+                showStatus('Please drop a valid JSON file', 'error');
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) loadFile(file);
+        });
+
+        function loadFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const content = e.target.result;
+                    const data = JSON.parse(content);
+                    inputText.value = content;
+                    
+                    // Auto-detect format
+                    const detectedInfo = detectFormat(data);
+                    if (detectedInfo) {
+                        showStatus(`✅ File loaded! Detected format: ${detectedInfo.format.toUpperCase()}`, 'success');
+                        autoSetDirection(detectedInfo);
+                    } else {
+                        showStatus('⚠️ File loaded but format could not be detected', 'info');
+                    }
+                } catch (error) {
+                    showStatus('Invalid JSON file: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Auto-detect format on paste/typing
+        inputText.addEventListener('input', debounce(() => {
+            try {
+                const content = inputText.value.trim();
+                if (!content) return;
+                
+                const data = JSON.parse(content);
+                const detectedInfo = detectFormat(data);
+                if (detectedInfo) {
+                    autoSetDirection(detectedInfo);
+                }
+            } catch (error) {
+                // Not valid JSON yet, ignore
+            }
+        }, 500));
+
+        function detectFormat(data) {
+            if (!data || !data.type) return null;
+            
+            const details = {
+                format: null,
+                collections: 0,
+                items: 0,
+                hasVersions: false
+            };
+            
+            if (data.type === 'workflow_collections') {
+                details.format = 'fsr';
+                details.collections = data.data?.length || 0;
+                data.data?.forEach(collection => {
+                    details.items += collection.workflows?.length || 0;
+                });
+            } else if (data.type === 'playbook_collections') {
+                details.format = 'fas';
+                details.collections = data.data?.length || 0;
+                details.hasVersions = Array.isArray(data.versions) && data.versions.length > 0;
+                data.data?.forEach(collection => {
+                    details.items += collection.playbooks?.length || 0;
+                });
+            }
+            
+            return details.format ? details : null;
+        }
+
+        function autoSetDirection(detectedInfo) {
+            const detectionBanner = document.getElementById('detectionBanner');
+            const detectionText = document.getElementById('detectionText');
+            
+            if (detectedInfo.format === 'fsr') {
+                setDirection('fsr-to-fas');
+                showFormatDetection('FSR', 'FAS');
+                detectionText.innerHTML = `
+                    <div style="display: grid; gap: 8px;">
+                        <div>Detected <strong style="color: var(--error);">FSR (FortiSOAR)</strong> format</div>
+                        <div style="font-size: 0.9em;">
+                            • Type: <code style="background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px;">workflow_collections</code><br>
+                            • Collections: <strong>${detectedInfo.collections}</strong><br>
+                            • Workflows: <strong>${detectedInfo.items}</strong><br>
+                            • Auto-selected: <strong style="color: var(--accent-primary);">FSR → FAS</strong>
+                        </div>
+                    </div>
+                `;
+                detectionBanner.style.display = 'block';
+            } else if (detectedInfo.format === 'fas') {
+                setDirection('fas-to-fsr');
+                showFormatDetection('FAS', 'FSR');
+                detectionText.innerHTML = `
+                    <div style="display: grid; gap: 8px;">
+                        <div>Detected <strong style="color: var(--success);">FAS (FortiSOAR Cloud)</strong> format</div>
+                        <div style="font-size: 0.9em;">
+                            • Type: <code style="background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px;">playbook_collections</code><br>
+                            • Collections: <strong>${detectedInfo.collections}</strong><br>
+                            • Playbooks: <strong>${detectedInfo.items}</strong><br>
+                            • Versions: <strong>${detectedInfo.hasVersions ? '✓ Present' : '✗ Missing'}</strong><br>
+                            • Auto-selected: <strong style="color: var(--accent-primary);">FAS → FSR</strong>
+                        </div>
+                    </div>
+                `;
+                detectionBanner.style.display = 'block';
+            }
+        }
+
+        function showFormatDetection(inputFormat, outputFormat) {
+            const badge = document.createElement('div');
+            badge.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                font-weight: 600;
+                box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+                z-index: 1000;
+                animation: slideInRight 0.3s ease;
+            `;
+            badge.innerHTML = `🔍 Detected: ${inputFormat} → ${outputFormat}`;
+            document.body.appendChild(badge);
+            
+            setTimeout(() => {
+                badge.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => badge.remove(), 300);
+            }, 3000);
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Convert button
+        convertBtn.addEventListener('click', () => {
+            try {
+                const input = inputText.value.trim();
+                if (!input) {
+                    showStatus('Please provide input JSON', 'error');
+                    return;
+                }
+
+                let result;
+                if (currentDirection === 'fsr-to-fas') {
+                    result = convertFSRtoFAS(input);
+                } else {
+                    result = convertFAStoFSR(input);
+                }
+
+                const output = JSON.stringify(result, null, 2);
+                outputText.value = output;
+                
+                downloadBtn.disabled = false;
+                copyBtn.disabled = false;
+                
+                updateStats(result, currentDirection);
+                showConversionInfo(result, currentDirection);
+                showStatus('✅ Conversion successful!', 'success');
+            } catch (error) {
+                showStatus('❌ Conversion error: ' + error.message, 'error');
+                console.error(error);
+            }
+        });
+
+        // Download button
+        downloadBtn.addEventListener('click', () => {
+            const content = outputText.value;
+            const blob = new Blob([content], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const prefix = currentDirection === 'fsr-to-fas' ? 'FAS' : 'FSR';
+            a.download = `${prefix}_Playbook_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showStatus('📥 File downloaded!', 'success');
+        });
+
+        // Copy button
+        copyBtn.addEventListener('click', () => {
+            outputText.select();
+            document.execCommand('copy');
+            showStatus('📋 Copied to clipboard!', 'success');
+        });
+
+        // Clear button
+        clearBtn.addEventListener('click', clearAll);
+
+        function clearAll() {
+            inputText.value = '';
+            outputText.value = '';
+            downloadBtn.disabled = true;
+            copyBtn.disabled = true;
+            statsGrid.style.display = 'none';
+            document.getElementById('conversionInfo').style.display = 'none';
+            document.getElementById('validationInfo').style.display = 'none';
+            document.getElementById('detectionBanner').style.display = 'none';
+            fileInput.value = '';
+            hideStatus();
+        }
+
+        function showStatus(message, type) {
+            statusMsg.textContent = message;
+            statusMsg.className = `status status-${type}`;
+            statusMsg.style.display = 'block';
+            
+            if (type === 'success' || type === 'info') {
+                setTimeout(hideStatus, 5000);
+            }
+        }
+
+        function hideStatus() {
+            statusMsg.style.display = 'none';
+        }
+
+        function updateStats(data, direction) {
+            const collections = data.data?.length || 0;
+            let playbooks = 0, steps = 0, routes = 0;
+
+            data.data?.forEach(collection => {
+                const items = direction === 'fsr-to-fas' ? collection.playbooks : collection.workflows;
+                if (items) {
+                    playbooks += items.length;
+                    items.forEach(item => {
+                        steps += item.steps?.length || 0;
+                        routes += item.routes?.length || 0;
+                    });
+                }
+            });
+
+            document.getElementById('statCollections').textContent = collections;
+            document.getElementById('statPlaybooks').textContent = playbooks;
+            document.getElementById('statSteps').textContent = steps;
+            document.getElementById('statRoutes').textContent = routes;
+            statsGrid.style.display = 'grid';
+        }
+
+        function showConversionInfo(data, direction) {
+            const infoPanel = document.getElementById('conversionInfo');
+            
+            if (direction === 'fsr-to-fas') {
+                let manualStartInfo = '';
+                let unsupportedWarning = '';
+                let unknownWarning = '';
+                
+                // Handle manual start conversions (informational, not a warning)
+                if (data._conversionSummary && data._conversionSummary.totalManualStartsConverted > 0) {
+                    const summary = data._conversionSummary;
+                    const playbookDetails = summary.playbooksWithManualStarts
+                        .map(pb => {
+                            const steps = pb.manualStarts
+                                .map(s => {
+                                    const noteMatch = s.note ? s.note.match(/^(.*?) converted to/) : null;
+                                    const startType = noteMatch ? noteMatch[1] : 'Start';
+                                    return `<li><strong>${s.name}</strong> (${startType})</li>`;
+                                })
+                                .join('');
+                            return `
+                                <div style="margin-bottom: 10px;">
+                                    <strong style="color: var(--accent-primary);">📋 ${pb.name}</strong>
+                                    <ul style="margin-left: 20px; margin-top: 5px;">
+                                        ${steps}
+                                    </ul>
+                                </div>
+                            `;
+                        })
+                        .join('');
+                    
+                    manualStartInfo = `
+                        <div class="warning-box" style="border-color: var(--accent-primary); background: rgba(0, 217, 255, 0.1);">
+                            <h3 style="color: var(--accent-primary); margin-bottom: 10px;">ℹ️ FSR Start Steps Converted to Referenced Start</h3>
+                            <p style="margin-bottom: 15px;">
+                                <strong>${summary.totalManualStartsConverted}</strong> FSR start step(s) have been converted to referenced start steps. 
+                                <strong>FAS only supports referenced playbooks</strong> (called by other playbooks or API), not FSR-style triggers.
+                            </p>
+                            <div style="margin: 15px 0; padding: 10px; background: var(--bg-tertiary); border-radius: 6px;">
+                                <strong>FSR Start Types Converted:</strong>
+                                <ul style="margin-left: 20px; margin-top: 5px;">
+                                    <li><strong>Manual Start</strong> - UI button triggers removed</li>
+                                    <li><strong>On Create</strong> - Record creation triggers removed</li>
+                                    <li><strong>On Update</strong> - Record update triggers removed</li>
+                                    <li><strong>API Endpoint</strong> - Custom API routes removed</li>
+                                </ul>
+                            </div>
+                            <div style="margin: 15px 0; padding: 10px; background: var(--bg-tertiary); border-radius: 6px;">
+                                <strong>What changed:</strong>
+                                <ul style="margin-left: 20px; margin-top: 5px;">
+                                    <li>Removed: <code>route</code>, <code>resources</code>, <code>fieldbasedtrigger</code>, <code>authentication_methods</code></li>
+                                    <li>Added: <code>__triggerLimit</code>, <code>triggerOnSource</code></li>
+                                    <li>Original start configuration preserved in <code>_originalStartStep</code></li>
+                                    <li>Step type changed to: <code>b348f017-9a94-471f-87f8-ce88b6a7ad62</code> (Referenced Start)</li>
+                                </ul>
+                            </div>
+                            <details style="margin-top: 15px;">
+                                <summary style="cursor: pointer; font-weight: 600;">View converted playbooks</summary>
+                                <div style="margin-top: 10px;">
+                                    ${playbookDetails}
+                                </div>
+                            </details>
+                            <div style="margin-top: 15px; padding: 10px; background: rgba(239, 68, 68, 0.1); border-left: 3px solid var(--error); border-radius: 6px;">
+                                <strong style="color: var(--error);">⚠️ Important:</strong> These playbooks can no longer be triggered by:
+                                <ul style="margin-left: 20px; margin-top: 5px;">
+                                    <li>Manual UI buttons in FortiSOAR</li>
+                                    <li>Record create/update events</li>
+                                    <li>Custom API endpoints</li>
+                                </ul>
+                                <strong>They must now be called by:</strong>
+                                <ul style="margin-left: 20px; margin-top: 5px;">
+                                    <li>Other playbooks (via Reference Playbook step)</li>
+                                    <li>FAS API (programmatic execution)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Handle unknown step types (more critical)
+                if (data._conversionSummary && data._conversionSummary.totalUnknownSteps > 0) {
+                    const summary = data._conversionSummary;
+                    const stepsByType = Object.entries(summary.unknownStepTypes)
+                        .map(([uuid, info]) => `<li>${uuid}: ${info.count} step(s) - Examples: ${info.examples.slice(0, 3).join(', ')}</li>`)
+                        .join('');
+                    
+                    const playbookDetails = summary.playbooksWithUnknown
+                        .map(pb => {
+                            const steps = pb.unknownSteps
+                                .map(s => `<li><strong>${s.name}</strong> (UUID: ${s.stepTypeUuid})</li>`)
+                                .join('');
+                            return `
+                                <div style="margin-bottom: 10px;">
+                                    <strong style="color: var(--error);">📋 ${pb.name}</strong>
+                                    <ul style="margin-left: 20px; margin-top: 5px;">
+                                        ${steps}
+                                    </ul>
+                                </div>
+                            `;
+                        })
+                        .join('');
+                    
+                    unknownWarning = `
+                        <div class="warning-box" style="border-color: var(--error); background: rgba(239, 68, 68, 0.1);">
+                            <h3 style="color: var(--error); margin-bottom: 10px;">🚨 CRITICAL: Unknown Step Types Detected</h3>
+                            <p style="margin-bottom: 15px;">
+                                <strong>${summary.totalUnknownSteps}</strong> step(s) with unrecognized step types were found. 
+                                These may be new FSR step types, custom steps, or errors. They have been converted to Set Variable 
+                                steps with "UNKNOWN:" prefix. <strong>Manual verification required before importing to FAS.</strong>
+                            </p>
+                            <details style="margin-top: 15px;">
+                                <summary style="cursor: pointer; font-weight: 600; color: var(--error);">⚠️ View unknown step types</summary>
+                                <ul style="margin-top: 10px; padding-left: 20px;">
+                                    ${stepsByType}
+                                </ul>
+                            </details>
+                            <details style="margin-top: 15px;">
+                                <summary style="cursor: pointer; font-weight: 600; color: var(--error);">⚠️ View affected playbooks</summary>
+                                <div style="margin-top: 10px;">
+                                    ${playbookDetails}
+                                </div>
+                            </details>
+                            <div style="margin-top: 15px; padding: 10px; background: var(--bg-tertiary); border-radius: 6px;">
+                                <strong>Action Required:</strong>
+                                <ol style="margin-left: 20px; margin-top: 5px;">
+                                    <li>Check the original FSR playbook to verify these step types</li>
+                                    <li>Research if these step types are supported in FAS</li>
+                                    <li>If supported: Update the converter's SUPPORTED_STEP_TYPES list</li>
+                                    <li>If unsupported: Update the converter's UNSUPPORTED_STEP_TYPES list</li>
+                                    <li>If in doubt: Contact FortiSOAR support before importing</li>
+                                </ol>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Handle known unsupported step types
+                if (data._conversionSummary && data._conversionSummary.totalUnsupportedSteps > 0) {
+                    const summary = data._conversionSummary;
+                    const stepsByType = Object.entries(summary.unsupportedByType)
+                        .map(([type, count]) => `<li>${type}: ${count} step(s)</li>`)
+                        .join('');
+                    
+                    const playbookDetails = summary.playbooksWithUnsupported
+                        .map(pb => {
+                            const steps = pb.unsupportedSteps
+                                .map(s => `<li><strong>${s.name}</strong> (${s.type})</li>`)
+                                .join('');
+                            return `
+                                <div style="margin-bottom: 10px;">
+                                    <strong style="color: var(--warning);">📋 ${pb.name}</strong>
+                                    <ul style="margin-left: 20px; margin-top: 5px;">
+                                        ${steps}
+                                    </ul>
+                                </div>
+                            `;
+                        })
+                        .join('');
+                    
+                    unsupportedWarning = `
+                        <div class="warning-box">
+                            <h3 style="color: var(--warning); margin-bottom: 10px;">⚠️ Unsupported Steps Converted</h3>
+                            <p style="margin-bottom: 15px;">
+                                <strong>${summary.totalUnsupportedSteps}</strong> step(s) were not supported in FAS and have been converted to 
+                                Set Variable steps with "UNSUPPORTED:" prefix. Original step data is preserved in the <code>_tmp</code> variable.
+                            </p>
+                            <details style="margin-top: 15px;">
+                                <summary style="cursor: pointer; font-weight: 600;">View unsupported steps by type</summary>
+                                <ul style="margin-top: 10px; padding-left: 20px;">
+                                    ${stepsByType}
+                                </ul>
+                            </details>
+                            <details style="margin-top: 15px;">
+                                <summary style="cursor: pointer; font-weight: 600;">View affected playbooks</summary>
+                                <div style="margin-top: 10px;">
+                                    ${playbookDetails}
+                                </div>
+                            </details>
+                        </div>
+                    `;
+                }
+                
+                infoPanel.innerHTML = `
+                    ${manualStartInfo}
+                    ${unknownWarning}
+                    ${unsupportedWarning}
+                    <h3>🔍 Conversion Details</h3>
+                    <ul>
+                        <li>Changed type: "workflow_collections" → "playbook_collections"</li>
+                        <li>Renamed: "workflows" → "playbooks"</li>
+                        <li>Updated API paths: /api/3/ → /api/workflow/</li>
+                        <li>Converted timestamps to ISO 8601 format</li>
+                        <li>Added collection references to playbooks</li>
+                        <li>Created versions array (${data.versions?.length || 0} entries)</li>
+                        <li>Removed @context fields</li>
+                        <li>Converted manual start steps to referenced starts (FAS requirement)</li>
+                    </ul>
+                    <details>
+                        <summary>About the versions array</summary>
+                        <div class="detail-content">
+                            <p>The versions array is <strong>required for manual upload</strong> in FAS. It contains:</p>
+                            <ul style="margin-top: 10px;">
+                                <li>Version metadata (uuid, name, dates)</li>
+                                <li>Simplified playbook structure in 'json' field</li>
+                                <li>Steps with integer coordinates (not strings)</li>
+                                <li>Minimal route structure</li>
+                            </ul>
+                        </div>
+                    </details>
+                    <details>
+                        <summary>About unsupported steps</summary>
+                        <div class="detail-content">
+                            <p><strong>The following step types are not supported in FAS:</strong></p>
+                            <ul style="margin-top: 10px;">
+                                <li><strong>Create Record</strong> - Creates new records in modules</li>
+                                <li><strong>Update Record</strong> - Updates existing records</li>
+                                <li><strong>Find Record</strong> - Queries and retrieves records</li>
+                                <li><strong>Code Snippet</strong> - Executes custom Python code</li>
+                                <li><strong>Ingest Bulk Feed</strong> - Bulk data ingestion</li>
+                            </ul>
+                            <p style="margin-top: 10px;">
+                                These steps have been converted to Set Variable steps with the original configuration preserved 
+                                in the <code>arguments._tmp</code> field, allowing you to review and manually recreate the functionality.
+                            </p>
+                        </div>
+                    </details>
+                    <details>
+                        <summary>About unknown step types</summary>
+                        <div class="detail-content">
+                            <p><strong>Unknown step types</strong> are step types that the converter doesn't recognize. This could mean:</p>
+                            <ul style="margin-top: 10px;">
+                                <li>New FSR step types added after this converter was created</li>
+                                <li>Custom or plugin-based step types</li>
+                                <li>Corrupted or invalid step type UUIDs</li>
+                            </ul>
+                            <p style="margin-top: 10px;">
+                                <strong>These require investigation before importing to FAS.</strong> Check the original FSR playbook 
+                                to understand what these steps do, then determine if they're supported in FAS.
+                            </p>
+                        </div>
+                    </details>
+                `;
+            } else {
+                infoPanel.innerHTML = `
+                    <h3>🔍 Conversion Details</h3>
+                    <ul>
+                        <li>Changed type: "playbook_collections" → "workflow_collections"</li>
+                        <li>Renamed: "playbooks" → "workflows"</li>
+                        <li>Updated API paths: /api/workflow/ → /api/3/</li>
+                        <li>Converted timestamps to Unix format</li>
+                        <li>Removed collection object references</li>
+                        <li>Removed versions array</li>
+                        <li>Added @context fields</li>
+                        <li><strong>Adjusted step positions for FSR canvas</strong></li>
+                    </ul>
+                    <details>
+                        <summary>About position adjustment</summary>
+                        <div class="detail-content">
+                            <p>FAS and FSR use different coordinate systems. This converter automatically:</p>
+                            <ul style="margin-top: 10px;">
+                                <li>Calculates minimum step positions</li>
+                                <li>Applies offset to ensure visibility (minimum 30px from top, 300px from left)</li>
+                                <li>Maintains relative positioning between steps</li>
+                                <li>Prevents steps from being hidden behind UI elements</li>
+                            </ul>
+                        </div>
+                    </details>
+                `;
+            }
+            
+            infoPanel.style.display = 'block';
+        }
+
+        // Conversion functions
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        function extractUUID(ref) {
+            if (!ref) return null;
+            if (typeof ref === 'string' && ref.includes('/')) {
+                const parts = ref.split('/');
+                return parts[parts.length - 1];
+            }
+            return ref;
+        }
+
+        function getPriority(priorityRef) {
+            if (!priorityRef) return 'medium';
+            if (typeof priorityRef === 'string' && priorityRef.includes('picklists')) {
+                return 'medium';
+            }
+            return priorityRef;
+        }
+
+        function getStepName(stepRef, steps) {
+            const uuid = extractUUID(stepRef);
+            const step = steps?.find(s => s.uuid === uuid);
+            return step ? step.name : 'Unknown';
+        }
+
+        // FSR to FAS conversion
+        function convertFSRtoFAS(fsrJson) {
+            const fsr = JSON.parse(fsrJson);
+            
+            if (fsr.type !== 'workflow_collections') {
+                throw new Error('Input must be a FortiSOAR workflow_collections export');
+            }
+
+            const fas = {
+                type: 'playbook_collections',
+                data: [],
+                versions: [],
+                _conversionSummary: {
+                    totalUnsupportedSteps: 0,
+                    totalUnknownSteps: 0,
+                    totalManualStartsConverted: 0,
+                    unsupportedByType: {},
+                    unknownStepTypes: {},
+                    playbooksWithUnsupported: [],
+                    playbooksWithUnknown: [],
+                    playbooksWithManualStarts: []
+                }
+            };
+
+            fsr.data.forEach(collection => {
+                const fasCollection = {
+                    '@id': `/api/workflow/playbook-collections/${collection.uuid}/`,
+                    uuid: collection.uuid,
+                    createDate: new Date(collection.createDate * 1000).toISOString(),
+                    modifyDate: new Date(collection.modifyDate * 1000).toISOString(),
+                    deletedAt: collection.deletedAt || null,
+                    name: collection.name || '',
+                    description: collection.description || null,
+                    visible: collection.visible !== undefined ? collection.visible : true,
+                    image: collection.image || null,
+                    importedBy: collection.importedBy || {},
+                    createUser: collection.createUser ? extractUUID(collection.createUser) : generateUUID(),
+                    modifyUser: collection.modifyUser ? extractUUID(collection.modifyUser) : generateUUID(),
+                    tags: collection.recordTags || [],
+                    '@type': 'WorkflowCollection',
+                    playbooks: []
+                };
+
+                if (collection.workflows) {
+                    collection.workflows.forEach(workflow => {
+                        const playbook = convertWorkflowToPlaybook(workflow, fasCollection);
+                        
+                        // Track conversion statistics
+                        if (playbook._conversionStats) {
+                            const unsupportedSteps = playbook._conversionStats.unsupportedSteps.filter(s => s.category === 'unsupported');
+                            const unknownSteps = playbook._conversionStats.unsupportedSteps.filter(s => s.category === 'unknown');
+                            const manualStartSteps = playbook._conversionStats.supportedSteps.filter(s => s.note && s.note.includes('Manual start'));
+                            
+                            // Track unsupported steps
+                            if (unsupportedSteps.length > 0) {
+                                fas._conversionSummary.totalUnsupportedSteps += unsupportedSteps.length;
+                                fas._conversionSummary.playbooksWithUnsupported.push({
+                                    name: playbook.name,
+                                    uuid: playbook.uuid,
+                                    unsupportedSteps: unsupportedSteps
+                                });
+                                
+                                unsupportedSteps.forEach(step => {
+                                    if (!fas._conversionSummary.unsupportedByType[step.type]) {
+                                        fas._conversionSummary.unsupportedByType[step.type] = 0;
+                                    }
+                                    fas._conversionSummary.unsupportedByType[step.type]++;
+                                });
+                            }
+                            
+                            // Track unknown steps
+                            if (unknownSteps.length > 0) {
+                                fas._conversionSummary.totalUnknownSteps += unknownSteps.length;
+                                fas._conversionSummary.playbooksWithUnknown.push({
+                                    name: playbook.name,
+                                    uuid: playbook.uuid,
+                                    unknownSteps: unknownSteps
+                                });
+                                
+                                unknownSteps.forEach(step => {
+                                    const key = `UUID: ${step.stepTypeUuid}`;
+                                    if (!fas._conversionSummary.unknownStepTypes[key]) {
+                                        fas._conversionSummary.unknownStepTypes[key] = {
+                                            count: 0,
+                                            examples: []
+                                        };
+                                    }
+                                    fas._conversionSummary.unknownStepTypes[key].count++;
+                                    fas._conversionSummary.unknownStepTypes[key].examples.push(step.name);
+                                });
+                            }
+                            
+                            // Track manual start conversions
+                            if (manualStartSteps.length > 0) {
+                                fas._conversionSummary.totalManualStartsConverted += manualStartSteps.length;
+                                fas._conversionSummary.playbooksWithManualStarts.push({
+                                    name: playbook.name,
+                                    uuid: playbook.uuid,
+                                    manualStarts: manualStartSteps.map(s => ({ name: s.name, uuid: s.uuid }))
+                                });
+                            }
+                        }
+                        
+                        // Remove internal stats before adding to output
+                        delete playbook._conversionStats;
+                        
+                        fasCollection.playbooks.push(playbook);
+                        
+                        const version = createVersionEntry(playbook);
+                        fas.versions.push(version);
+                    });
+                }
+
+                fas.data.push(fasCollection);
+            });
+
+            return fas;
+        }
+
+        // Define all FSR start step types that must be converted to referenced starts
+        const FSR_START_STEP_TYPES = {
+            // Manual Start (UI button trigger)
+            'f414d039-bb0d-4e59-9c39-a8f1e880b18a': 'Manual Start',
+            // On Create (triggered when record created)
+            'ea155646-3821-4542-9702-b246da430a8d': 'On Create',
+            // On Update (triggered when record updated)
+            '9300bf69-5063-486d-b3a6-47eb9da24872': 'On Update',
+            // API Start (triggered via API endpoint)
+            'df26c7a2-4166-4ca5-91e5-548e24c01b5f': 'API Endpoint'
+        };
+        
+        // Define unsupported step types that need to be converted to Set Variable steps
+        const UNSUPPORTED_STEP_TYPES = {
+            // Create Record
+            '2597053c-e718-44b4-8394-4d40fe26d357': 'Create Record',
+            // Update Record
+            'b593663d-7d13-40ce-a3a3-96dece928722': 'Update Record',
+            // Find Record
+            'b593663d-7d13-40ce-a3a3-96dece928770': 'Find Record',
+            // Code Snippet
+            '1fdd14cc-d6b4-4335-a3af-ab49c8ed2fd8': 'Code Snippet',
+            // Ingest Bulk Feed
+            '7b221880-716b-4726-a2ca-5e568d330b3e': 'Ingest Bulk Feed'
+        };
+
+        // Define known supported step types in FAS
+        const SUPPORTED_STEP_TYPES = {
+            // Start/Trigger Steps (FAS referenced only)
+            'b348f017-9a94-471f-87f8-ce88b6a7ad62': 'Start/Trigger (FAS Referenced)',
+            // Set Variables / Configuration
+            '04d0cf46-b6a8-42c4-8683-60a7eaa69e8f': 'Set Variables',
+            // Decision
+            '12254cf5-5db7-4b1a-8cb1-3af081924b28': 'Decision',
+            // Reference Playbook
+            '74932bdc-b8b6-4d24-88c4-1a4dfbc524f3': 'Reference Playbook',
+            // Wait
+            '6832e556-b9c7-497a-babe-feda3bd27dbf': 'Wait',
+            // Manual Input / User Input
+            'fc04082a-d7dc-4299-96fb-6837b1baa0fe': 'Manual Input',
+            // Connector
+            '0bfed618-0316-11e7-93ae-92361f002671': 'Connector',
+            // Utility / No-Op
+            '0109f35d-090b-4a2b-bd8a-94cbc3508562': 'Utility/No-Op',
+            // Email
+            '0bfed618-0316-11e7-93ae-92361f002675': 'Email',
+            // Attachment
+            '0bfed618-0316-11e7-93ae-92361f002674': 'Attachment'
+        };
+
+        // Set Variable step type UUID for FAS
+        const SET_VARIABLE_STEP_TYPE = '04d0cf46-b6a8-42c4-8683-60a7eaa69e8f';
+        
+        // FAS Start/Trigger step type (referenced only)
+        const FAS_START_STEP_TYPE = 'b348f017-9a94-471f-87f8-ce88b6a7ad62';
+
+        function isUnsupportedStepType(stepTypeUuid) {
+            return UNSUPPORTED_STEP_TYPES.hasOwnProperty(stepTypeUuid);
+        }
+
+        function isSupportedStepType(stepTypeUuid) {
+            return SUPPORTED_STEP_TYPES.hasOwnProperty(stepTypeUuid);
+        }
+        
+        function isFSRStartStep(stepTypeUuid) {
+            return FSR_START_STEP_TYPES.hasOwnProperty(stepTypeUuid);
+        }
+
+        function isUnknownStepType(stepTypeUuid) {
+            return !isUnsupportedStepType(stepTypeUuid) && 
+                   !isSupportedStepType(stepTypeUuid) && 
+                   !isFSRStartStep(stepTypeUuid);
+        }
+        
+        function fixDecisionStepIRIs(arguments) {
+            // Deep clone to avoid modifying original
+            const fixedArgs = JSON.parse(JSON.stringify(arguments));
+            
+            // Check if this has conditions array (Decision step)
+            if (fixedArgs.conditions && Array.isArray(fixedArgs.conditions)) {
+                fixedArgs.conditions.forEach(condition => {
+                    // Convert /api/3/workflow_steps/UUID to api/3/workflow_steps/UUID (remove leading slash)
+                    if (condition.step_iri && typeof condition.step_iri === 'string') {
+                        // If it has leading slash, remove it
+                        if (condition.step_iri.startsWith('/api/3/workflow_steps/')) {
+                            condition.step_iri = condition.step_iri.substring(1);
+                        }
+                        // If it's just UUID, add the prefix without leading slash
+                        else if (!condition.step_iri.startsWith('api/3/workflow_steps/')) {
+                            condition.step_iri = 'api/3/workflow_steps/' + condition.step_iri;
+                        }
+                    }
+                });
+            }
+            
+            return fixedArgs;
+        }
+        
+        function fixConnectorStep(arguments) {
+            // Deep clone to avoid modifying original
+            const fixedArgs = JSON.parse(JSON.stringify(arguments));
+            
+            // If this is a connector step, ensure it has proper FAS structure
+            if (fixedArgs.connector) {
+                // Preserve existing fields but ensure required FAS fields exist
+                return {
+                    name: fixedArgs.name || fixedArgs.connector.toUpperCase(),
+                    config: fixedArgs.config || '',
+                    params: fixedArgs.params || {},
+                    version: fixedArgs.version || '1.0.0',
+                    connector: fixedArgs.connector,
+                    operation: fixedArgs.operation || '',
+                    ...fixedArgs // Keep any additional fields
+                };
+            }
+            
+            return fixedArgs;
+        }
+        
+        function fixManualInputStepUUIDs(arguments) {
+            // Deep clone to avoid modifying original
+            const fixedArgs = JSON.parse(JSON.stringify(arguments));
+            
+            // Check if this has response_mapping.options (Manual Input step)
+            if (fixedArgs.response_mapping && 
+                fixedArgs.response_mapping.options && 
+                Array.isArray(fixedArgs.response_mapping.options)) {
+                
+                fixedArgs.response_mapping.options.forEach(option => {
+                    // Convert /api/3/workflow_steps/UUID to api/3/workflow_steps/UUID (remove leading slash)
+                    if (option.step_uuid && typeof option.step_uuid === 'string') {
+                        // If it has leading slash, remove it
+                        if (option.step_uuid.startsWith('/api/3/workflow_steps/')) {
+                            option.step_uuid = option.step_uuid.substring(1);
+                        }
+                        // If it's just UUID, add the prefix without leading slash
+                        else if (!option.step_uuid.startsWith('api/3/workflow_steps/')) {
+                            option.step_uuid = 'api/3/workflow_steps/' + option.step_uuid;
+                        }
+                    }
+                });
+            }
+            
+            return fixedArgs;
+        }
+        
+        function convertFSRStartToReferenced(step, playbookUuid) {
+            const args = step.arguments || {};
+            const stepTypeUuid = step.stepType ? step.stepType.replace('/api/3/workflow_step_types/', '') : '';
+            const startTypeName = FSR_START_STEP_TYPES[stepTypeUuid] || 'Unknown Start';
+            
+            // Extract input parameters if they exist
+            const existingParams = args.step_variables?.input?.params || {};
+            const paramNames = typeof existingParams === 'object' && !Array.isArray(existingParams) 
+                ? Object.keys(existingParams) 
+                : [];
+            
+            // Build description based on start type
+            let description = `Converted from ${startTypeName} step. `;
+            
+            if (args.resource || args.resources) {
+                const resources = args.resources || [args.resource];
+                description += `Original trigger was for resource(s): ${JSON.stringify(resources)}. `;
+            }
+            
+            if (args.route) {
+                description += `Original route: ${args.route}. `;
+            }
+            
+            if (args.fieldbasedtrigger) {
+                description += `Had field-based trigger conditions. `;
+            }
+            
+            description += `FAS requires referenced playbooks only - this playbook must be called by another playbook or via API. Original configuration preserved in _originalStartStep as JSON string.`;
+            
+            // Preserve COMPLETE original step configuration
+            const originalStep = {
+                '@type': step['@type'],
+                name: step.name,
+                description: step.description,
+                stepType: step.stepType,
+                arguments: JSON.parse(JSON.stringify(step.arguments)), // Deep copy
+                status: step.status,
+                top: step.top,
+                left: step.left,
+                group: step.group,
+                uuid: step.uuid,
+                _conversionNote: `Original ${startTypeName} step. All fields preserved for reference.`
+            };
+            
+            // Convert to JSON string
+            const originalStartStepString = JSON.stringify(originalStep, null, 2);
+            
+            // Create a referenced start step for FAS
+            return {
+                uuid: step.uuid || generateUUID(),
+                workflow: playbookUuid,
+                name: step.name || 'Start',
+                description: description,
+                arguments: {
+                    __triggerLimit: true,
+                    step_variables: {
+                        input: {
+                            params: paramNames.length > 0 ? paramNames : []
+                        }
+                    },
+                    triggerOnSource: true,
+                    triggerOnReplicate: false,
+                    _originalStartStep: originalStartStepString
+                },
+                status: step.status || null,
+                top: String(step.top || 0),
+                left: String(step.left || 0),
+                workflowgroup: step.group || null,
+                stepType: FAS_START_STEP_TYPE,
+                '@type': 'WorkflowStep'
+            };
+        }
+
+        function convertUnsupportedStep(step, playbookUuid, isUnknown = false) {
+            const stepTypeUuid = step.stepType ? step.stepType.replace('/api/3/workflow_step_types/', '') : '';
+            const stepTypeName = UNSUPPORTED_STEP_TYPES[stepTypeUuid] || (isUnknown ? 'Unknown Step Type' : 'Unknown');
+            
+            const prefix = isUnknown ? 'UNKNOWN' : 'UNSUPPORTED';
+            const description = isUnknown 
+                ? `Unknown step type (UUID: ${stepTypeUuid}). This step type is not recognized by the converter. Original configuration preserved in _tmp variable as JSON string. Please verify if this step type is supported in FAS before importing.`
+                : `Original step type: ${stepTypeName}. This step is not supported in FAS and has been converted to a Set Variable step. Original configuration preserved in _tmp variable as JSON string.`;
+            
+            // Preserve COMPLETE original step configuration
+            const originalStep = {
+                '@type': step['@type'],
+                name: step.name,
+                description: step.description,
+                stepType: step.stepType,
+                arguments: JSON.parse(JSON.stringify(step.arguments || {})), // Deep copy
+                status: step.status,
+                top: step.top,
+                left: step.left,
+                group: step.group,
+                uuid: step.uuid,
+                _conversionNote: isUnknown 
+                    ? `Original ${stepTypeName} step (UUID: ${stepTypeUuid}). This step type was unknown to the converter. It may be a new FSR step type or a custom step. Verify support in FAS.`
+                    : `Original ${stepTypeName} step. This step type is known to be unsupported in FAS. Manual recreation required. All original fields preserved for reference.`
+            };
+            
+            // Convert to JSON string for Set Variable step
+            const tmpValue = JSON.stringify(originalStep, null, 2);
+            
+            // Create a Set Variable step with UNSUPPORTED/UNKNOWN prefix
+            return {
+                uuid: step.uuid || generateUUID(),
+                workflow: playbookUuid,
+                name: `${prefix}: ${step.name || stepTypeName}`,
+                description: description,
+                arguments: {
+                    _tmp: tmpValue
+                },
+                status: step.status || null,
+                top: String(step.top || 0),
+                left: String(step.left || 0),
+                workflowgroup: step.group || null,
+                stepType: SET_VARIABLE_STEP_TYPE,
+                '@type': 'WorkflowStep'
+            };
+        }
+
+        function convertWorkflowToPlaybook(workflow, fasCollection) {
+            const playbookUuid = workflow.uuid || generateUUID();
+            const conversionStats = {
+                unsupportedSteps: [],
+                supportedSteps: []
+            };
+            
+            const playbook = {
+                '@id': `/api/workflow/playbooks/${playbookUuid}/`,
+                uuid: playbookUuid,
+                name: workflow.name ? workflow.name.replace(/^> /, '') : '',
+                createDate: new Date(workflow.createDate * 1000).toISOString(),
+                modifyDate: new Date(workflow.modifyDate * 1000).toISOString(),
+                priority: getPriority(workflow.priority),
+                triggerLimit: workflow.triggerLimit || null,
+                steps: [],
+                routes: [],
+                groups: workflow.groups || [],
+                aliasName: workflow.aliasName || null,
+                tags: workflow.recordTags || [],
+                description: workflow.description || null,
+                isActive: workflow.isActive !== undefined ? workflow.isActive : false,
+                debug: workflow.debug !== undefined ? workflow.debug : false,
+                singleRecordExecution: workflow.singleRecordExecution !== undefined ? workflow.singleRecordExecution : false,
+                remoteExecutableFlag: workflow.remoteExecutableFlag !== undefined ? workflow.remoteExecutableFlag : false,
+                parameters: workflow.parameters || null,
+                synchronous: workflow.synchronous !== undefined ? workflow.synchronous : false,
+                isPrivate: workflow.isPrivate !== undefined ? workflow.isPrivate : false,
+                pinned: workflow.pinned !== undefined ? workflow.pinned : false,
+                lastModifyDate: workflow.lastModifyDate || Math.floor(Date.now() / 1000),
+                deletedAt: workflow.deletedAt || null,
+                importedBy: workflow.importedBy || null,
+                collection: {
+                    '@id': fasCollection['@id'],
+                    uuid: fasCollection.uuid,
+                    createDate: fasCollection.createDate,
+                    modifyDate: fasCollection.modifyDate,
+                    deletedAt: fasCollection.deletedAt,
+                    name: fasCollection.name,
+                    description: fasCollection.description,
+                    visible: fasCollection.visible,
+                    image: fasCollection.image,
+                    importedBy: fasCollection.importedBy,
+                    createUser: fasCollection.createUser,
+                    modifyUser: fasCollection.modifyUser,
+                    tags: fasCollection.tags,
+                    '@type': 'WorkflowCollection'
+                },
+                _conversionStats: conversionStats
+            };
+
+            if (workflow.steps) {
+                workflow.steps.forEach(step => {
+                    const stepTypeUuid = step.stepType ? step.stepType.replace('/api/3/workflow_step_types/', '') : '';
+                    
+                    // Check if this is any FSR start step (all must be converted to referenced)
+                    if (isFSRStartStep(stepTypeUuid)) {
+                        const fasStep = convertFSRStartToReferenced(step, playbookUuid);
+                        playbook.steps.push(fasStep);
+                        conversionStats.supportedSteps.push({
+                            name: step.name,
+                            uuid: step.uuid,
+                            note: `${FSR_START_STEP_TYPES[stepTypeUuid]} converted to referenced start`
+                        });
+                    }
+                    // Check if step type is unsupported (known to not work in FAS)
+                    else if (isUnsupportedStepType(stepTypeUuid)) {
+                        const fasStep = convertUnsupportedStep(step, playbookUuid, false);
+                        playbook.steps.push(fasStep);
+                        conversionStats.unsupportedSteps.push({
+                            name: step.name,
+                            type: UNSUPPORTED_STEP_TYPES[stepTypeUuid],
+                            uuid: step.uuid,
+                            category: 'unsupported'
+                        });
+                    } 
+                    // Check if step type is unknown (not in our known lists)
+                    else if (isUnknownStepType(stepTypeUuid)) {
+                        const fasStep = convertUnsupportedStep(step, playbookUuid, true);
+                        playbook.steps.push(fasStep);
+                        conversionStats.unsupportedSteps.push({
+                            name: step.name,
+                            type: 'Unknown Step Type',
+                            uuid: step.uuid,
+                            stepTypeUuid: stepTypeUuid,
+                            category: 'unknown'
+                        });
+                    }
+                    // Step type is known and supported
+                    else {
+                        let stepArguments = step.arguments || {};
+                        
+                        // Fix Decision step conditions
+                        if (stepTypeUuid === '12254cf5-5db7-4b1a-8cb1-3af081924b28') {
+                            stepArguments = fixDecisionStepIRIs(stepArguments);
+                        }
+                        // Fix Manual Input step response_mapping
+                        else if (stepTypeUuid === 'fc04082a-d7dc-4299-96fb-6837b1baa0fe') {
+                            stepArguments = fixManualInputStepUUIDs(stepArguments);
+                        }
+                        // Fix Connector steps (type: 4c0019b2-055c-44d0-968c-678a0c2d762e)
+                        else if (stepTypeUuid === '4c0019b2-055c-44d0-968c-678a0c2d762e') {
+                            stepArguments = fixConnectorStep(stepArguments);
+                        }
+                        
+                        const fasStep = {
+                            uuid: step.uuid || generateUUID(),
+                            workflow: playbookUuid,
+                            name: step.name || '',
+                            description: step.description || null,
+                            arguments: stepArguments,
+                            status: step.status || null,
+                            top: String(step.top || 0),
+                            left: String(step.left || 0),
+                            workflowgroup: step.group || null,
+                            stepType: stepTypeUuid,
+                            '@type': 'WorkflowStep'
+                        };
+                        playbook.steps.push(fasStep);
+                        conversionStats.supportedSteps.push({
+                            name: step.name,
+                            uuid: step.uuid
+                        });
+                    }
+                });
+            }
+
+            if (workflow.routes) {
+                workflow.routes.forEach(route => {
+                    const routeUuid = route.uuid || generateUUID();
+                    const fasRoute = {
+                        '@id': `/api/workflow/playbook-routes/${routeUuid}/`,
+                        uuid: routeUuid,
+                        name: route.name || `${getStepName(route.sourceStep, workflow.steps)}->${getStepName(route.targetStep, workflow.steps)}`,
+                        data: {
+                            label: route.label !== undefined ? route.label : (route.data && route.data.label !== undefined ? route.data.label : '')
+                        },
+                        isExecuted: route.isExecuted !== undefined ? route.isExecuted : false,
+                        sourcestep: extractUUID(route.sourceStep),
+                        targetstep: extractUUID(route.targetStep),
+                        workflowgroup: route.group || null,
+                        workflow: playbookUuid,
+                        '@type': 'WorkflowRoute'
+                    };
+                    playbook.routes.push(fasRoute);
+                });
+            }
+
+            const triggerStepRef = workflow.triggerStep;
+            if (triggerStepRef) {
+                playbook.triggerstep = extractUUID(triggerStepRef);
+            } else if (playbook.steps.length > 0) {
+                const startStep = playbook.steps.find(s => 
+                    s.name.toLowerCase().includes('start') || 
+                    s.name.toLowerCase().includes('trigger')
+                );
+                playbook.triggerstep = startStep ? startStep.uuid : playbook.steps[0].uuid;
+            } else {
+                playbook.triggerstep = null;
+            }
+
+            playbook.createUser = workflow.createUser ? extractUUID(workflow.createUser) : generateUUID();
+            playbook.modifyUser = workflow.modifyUser ? extractUUID(workflow.modifyUser) : generateUUID();
+            playbook['@type'] = 'Workflow';
+
+            return playbook;
+        }
+
+        function createVersionEntry(playbook) {
+            const now = new Date().toISOString();
+            
+            return {
+                uuid: generateUUID(),
+                createDate: now,
+                modifyDate: now,
+                deletedAt: null,
+                name: "Version 1",
+                workflow_name: playbook.name,
+                note: "Converted from FSR",
+                json: {
+                    uuid: playbook.uuid,
+                    debug: playbook.debug,
+                    steps: playbook.steps.map(step => ({
+                        id: step.uuid,
+                        top: parseInt(step.top) || 0,
+                        left: parseInt(step.left) || 0,
+                        name: step.name,
+                        uuid: step.uuid,
+                        group: step.workflowgroup,
+                        stepType: step.stepType,
+                        arguments: step.arguments
+                    })),
+                    groups: playbook.groups,
+                    routes: playbook.routes.map(route => ({
+                        data: route.data,
+                        name: route.name,
+                        uuid: route.uuid,
+                        sourcestep: route.sourcestep,
+                        targetstep: route.targetstep
+                    })),
+                    parameters: playbook.parameters,
+                    triggerstep: playbook.triggerstep
+                },
+                draft: false,
+                published: true,
+                workflow: playbook.uuid,
+                createUser: playbook.createUser,
+                modifyUser: null
+            };
+        }
+
+        // FAS to FSR conversion
+        function convertFAStoFSR(fasJson) {
+            const fas = JSON.parse(fasJson);
+            
+            if (fas.type !== 'playbook_collections') {
+                throw new Error('Input must be a FAS playbook_collections export');
+            }
+
+            const fsr = {
+                type: 'workflow_collections',
+                data: [],
+                exported_tags: []
+            };
+
+            fas.data.forEach(collection => {
+                const fsrCollection = {
+                    '@context': '/api/3/contexts/WorkflowCollection',
+                    '@type': 'WorkflowCollection',
+                    name: collection.name || '',
+                    description: collection.description || null,
+                    visible: collection.visible !== undefined ? collection.visible : true,
+                    image: collection.image || null,
+                    uuid: collection.uuid,
+                    id: Math.floor(Math.random() * 10000),
+                    createDate: new Date(collection.createDate).getTime() / 1000,
+                    modifyDate: new Date(collection.modifyDate).getTime() / 1000,
+                    deletedAt: collection.deletedAt || null,
+                    importedBy: Array.isArray(collection.importedBy) ? collection.importedBy : [],
+                    recordTags: collection.tags || [],
+                    workflows: []
+                };
+
+                if (collection.playbooks) {
+                    collection.playbooks.forEach(playbook => {
+                        const workflow = convertPlaybookToWorkflow(playbook, fsrCollection);
+                        fsrCollection.workflows.push(workflow);
+                    });
+                }
+
+                fsr.data.push(fsrCollection);
+            });
+
+            return fsr;
+        }
+
+        function convertPlaybookToWorkflow(playbook, fsrCollection) {
+            const workflowUuid = playbook.uuid || generateUUID();
+            
+            // Calculate position offset - FAS coordinates need adjustment for FSR
+            // Find the minimum top and left to determine offset needed
+            let minTop = Infinity, minLeft = Infinity;
+            if (playbook.steps && playbook.steps.length > 0) {
+                playbook.steps.forEach(step => {
+                    const top = parseInt(step.top) || 0;
+                    const left = parseInt(step.left) || 0;
+                    if (top < minTop) minTop = top;
+                    if (left < minLeft) minLeft = left;
+                });
+            }
+            
+            // Apply offset to ensure steps are visible (minimum 30px from top/left)
+            const topOffset = minTop < 30 ? (30 - minTop) : 0;
+            const leftOffset = minLeft < 300 ? (300 - minLeft) : 0;
+            
+            const workflow = {
+                '@type': 'Workflow',
+                triggerLimit: playbook.triggerLimit || null,
+                name: playbook.name || '',
+                aliasName: playbook.aliasName || null,
+                tag: null,
+                description: playbook.description || null,
+                isActive: playbook.isActive !== undefined ? playbook.isActive : true,
+                debug: playbook.debug !== undefined ? playbook.debug : false,
+                singleRecordExecution: playbook.singleRecordExecution !== undefined ? playbook.singleRecordExecution : false,
+                remoteExecutableFlag: playbook.remoteExecutableFlag !== undefined ? playbook.remoteExecutableFlag : false,
+                parameters: playbook.parameters || null,
+                synchronous: playbook.synchronous !== undefined ? playbook.synchronous : false,
+                lastModifyDate: playbook.lastModifyDate || Math.floor(Date.now() / 1000),
+                collection: `/api/3/workflow_collections/${fsrCollection.uuid}`,
+                versions: [],
+                triggerStep: playbook.triggerstep ? `/api/3/workflow_steps/${playbook.triggerstep}` : null,
+                steps: [],
+                routes: [],
+                groups: playbook.groups || [],
+                priority: `/api/3/picklists/2b563c61-ae2c-41c0-a85a-c9709585e3f2`,
+                playbookOrigin: `/api/3/picklists/15c1e8c9-22bf-4e66-8fbb-0a502d4a4a3f`,
+                isEditable: true,
+                uuid: workflowUuid,
+                id: Math.floor(Math.random() * 10000),
+                createUser: `/api/3/people/${playbook.createUser || generateUUID()}`,
+                createDate: new Date(playbook.createDate).getTime() / 1000,
+                modifyUser: `/api/3/people/${playbook.modifyUser || generateUUID()}`,
+                modifyDate: new Date(playbook.modifyDate).getTime() / 1000,
+                owners: [],
+                isPrivate: playbook.isPrivate !== undefined ? playbook.isPrivate : false,
+                deletedAt: playbook.deletedAt || null,
+                importedBy: [],
+                recordTags: playbook.tags || []
+            };
+
+            if (playbook.steps) {
+                playbook.steps.forEach(step => {
+                    const originalTop = parseInt(step.top) || 0;
+                    const originalLeft = parseInt(step.left) || 0;
+                    
+                    let stepArguments = step.arguments || {};
+                    
+                    // Fix decision step conditions - add /api/3/workflow_steps/ prefix to step_iri
+                    if (stepArguments.conditions && Array.isArray(stepArguments.conditions)) {
+                        stepArguments = JSON.parse(JSON.stringify(stepArguments)); // Deep clone
+                        stepArguments.conditions.forEach(condition => {
+                            if (condition.step_iri && typeof condition.step_iri === 'string') {
+                                // If it starts with api/3/workflow_steps/, add leading slash
+                                if (condition.step_iri.startsWith('api/3/workflow_steps/')) {
+                                    condition.step_iri = '/' + condition.step_iri;
+                                }
+                                // If it's just UUID, add full prefix with leading slash
+                                else if (!condition.step_iri.startsWith('/api/3/workflow_steps/')) {
+                                    condition.step_iri = `/api/3/workflow_steps/${condition.step_iri}`;
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Fix manual input step response_mapping - add /api/3/workflow_steps/ prefix to step_uuid
+                    if (stepArguments.response_mapping && 
+                        stepArguments.response_mapping.options && 
+                        Array.isArray(stepArguments.response_mapping.options)) {
+                        stepArguments = JSON.parse(JSON.stringify(stepArguments)); // Deep clone
+                        stepArguments.response_mapping.options.forEach(option => {
+                            if (option.step_uuid && typeof option.step_uuid === 'string') {
+                                // If it starts with api/3/workflow_steps/, add leading slash
+                                if (option.step_uuid.startsWith('api/3/workflow_steps/')) {
+                                    option.step_uuid = '/' + option.step_uuid;
+                                }
+                                // If it's just UUID, add full prefix with leading slash
+                                else if (!option.step_uuid.startsWith('/api/3/workflow_steps/')) {
+                                    option.step_uuid = `/api/3/workflow_steps/${option.step_uuid}`;
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Fix connector steps - ensure simplified structure for FSR
+                    if (stepArguments.connector) {
+                        stepArguments = {
+                            config: stepArguments.config || '',
+                            version: stepArguments.version || '1.0.0',
+                            from_str: stepArguments.from_str || stepArguments.params?.from || '',
+                            connector: stepArguments.connector,
+                            step_variables: stepArguments.step_variables || []
+                        };
+                    }
+                    
+                    const fsrStep = {
+                        '@type': 'WorkflowStep',
+                        name: step.name || '',
+                        description: step.description || null,
+                        arguments: stepArguments,
+                        status: step.status || null,
+                        top: String(originalTop + topOffset),
+                        left: String(originalLeft + leftOffset),
+                        stepType: `/api/3/workflow_step_types/${step.stepType}`,
+                        group: step.workflowgroup || null,
+                        uuid: step.uuid || generateUUID()
+                    };
+                    workflow.steps.push(fsrStep);
+                });
+            }
+
+            if (playbook.routes) {
+                playbook.routes.forEach(route => {
+                    const fsrRoute = {
+                        '@type': 'WorkflowRoute',
+                        name: route.name || '',
+                        targetStep: `/api/3/workflow_steps/${route.targetstep}`,
+                        sourceStep: `/api/3/workflow_steps/${route.sourcestep}`,
+                        label: route.data?.label || null,
+                        isExecuted: route.isExecuted !== undefined ? route.isExecuted : false,
+                        group: route.workflowgroup || null,
+                        uuid: route.uuid || generateUUID()
+                    };
+                    workflow.routes.push(fsrRoute);
+                });
+            }
+
+            return workflow;
+        }
+    </script>
+</body>
+</html>
