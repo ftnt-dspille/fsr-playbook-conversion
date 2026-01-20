@@ -1,5 +1,31 @@
 // FAS to FSR conversion
 
+    // Helper function to safely convert FAS date (ISO string) to FSR date (Unix timestamp)
+    function convertDateToUnix(dateValue) {
+        // If no date provided, use current time
+        if (!dateValue) {
+            return Math.floor(Date.now() / 1000);
+        }
+
+        // If it's already a Unix timestamp (number), use it directly
+        if (typeof dateValue === 'number') {
+            // If it looks like milliseconds (very large number), convert to seconds
+            return dateValue > 10000000000 ? Math.floor(dateValue / 1000) : dateValue;
+        }
+
+        // Try to parse as ISO string
+        const date = new Date(dateValue);
+
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+            console.warn(`Invalid date value: ${dateValue}, using current time`);
+            return Math.floor(Date.now() / 1000);
+        }
+
+        // Convert to Unix timestamp (seconds)
+        return Math.floor(date.getTime() / 1000);
+    }
+
     function convertFAStoFSR(fasJson) {
         const fas = JSON.parse(fasJson);
 
@@ -23,8 +49,8 @@
                 image: collection.image || null,
                 uuid: collection.uuid,
                 id: Math.floor(Math.random() * 10000),
-                createDate: new Date(collection.createDate).getTime() / 1000,
-                modifyDate: new Date(collection.modifyDate).getTime() / 1000,
+                createDate: convertDateToUnix(collection.createDate),
+                modifyDate: convertDateToUnix(collection.modifyDate),
                 deletedAt: collection.deletedAt || null,
                 importedBy: Array.isArray(collection.importedBy) ? collection.importedBy : [],
                 recordTags: collection.tags || [],
@@ -89,9 +115,9 @@
             uuid: workflowUuid,
             id: Math.floor(Math.random() * 10000),
             createUser: `/api/3/people/${playbook.createUser || generateUUID()}`,
-            createDate: new Date(playbook.createDate).getTime() / 1000,
+            createDate: convertDateToUnix(playbook.createDate),
             modifyUser: `/api/3/people/${playbook.modifyUser || generateUUID()}`,
-            modifyDate: new Date(playbook.modifyDate).getTime() / 1000,
+            modifyDate: convertDateToUnix(playbook.modifyDate),
             owners: [],
             isPrivate: playbook.isPrivate !== undefined ? playbook.isPrivate : false,
             deletedAt: playbook.deletedAt || null,

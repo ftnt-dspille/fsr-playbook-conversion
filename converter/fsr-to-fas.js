@@ -1,4 +1,41 @@
-    // FSR to FAS conversion
+// FSR to FAS conversion
+    
+    // Helper function to safely convert FSR date (Unix timestamp) to FAS date (ISO string)
+    function convertUnixToISO(dateValue) {
+        // If no date provided, use current time
+        if (!dateValue && dateValue !== 0) {
+            return new Date().toISOString();
+        }
+
+        // If it's a string (already ISO), return as-is
+        if (typeof dateValue === 'string') {
+            // Validate it's a proper ISO string
+            const date = new Date(dateValue);
+            if (!isNaN(date.getTime())) {
+                return dateValue;
+            }
+            console.warn(`Invalid date string: ${dateValue}, using current time`);
+            return new Date().toISOString();
+        }
+
+        // Convert Unix timestamp to milliseconds if needed
+        let timestamp = dateValue;
+        if (timestamp < 10000000000) {
+            // Looks like seconds, convert to milliseconds
+            timestamp = timestamp * 1000;
+        }
+
+        const date = new Date(timestamp);
+        
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+            console.warn(`Invalid date value: ${dateValue}, using current time`);
+            return new Date().toISOString();
+        }
+
+        return date.toISOString();
+    }
+    
     function convertFSRtoFAS(fsrJson) {
         const fsr = JSON.parse(fsrJson);
 
@@ -26,8 +63,8 @@
             const fasCollection = {
                 '@id': `/api/workflow/playbook-collections/${collection.uuid}/`,
                 uuid: collection.uuid,
-                createDate: new Date(collection.createDate * 1000).toISOString(),
-                modifyDate: new Date(collection.modifyDate * 1000).toISOString(),
+                createDate: convertUnixToISO(collection.createDate),
+                modifyDate: convertUnixToISO(collection.modifyDate),
                 deletedAt: collection.deletedAt || null,
                 name: collection.name || '',
                 description: collection.description || null,
@@ -322,8 +359,8 @@
             '@id': `/api/workflow/playbooks/${playbookUuid}/`,
             uuid: playbookUuid,
             name: workflow.name ? workflow.name.replace(/^> /, '') : '',
-            createDate: new Date(workflow.createDate * 1000).toISOString(),
-            modifyDate: new Date(workflow.modifyDate * 1000).toISOString(),
+            createDate: convertUnixToISO(workflow.createDate),
+            modifyDate: convertUnixToISO(workflow.modifyDate),
             priority: getPriority(workflow.priority),
             triggerLimit: workflow.triggerLimit || null,
             steps: [],
@@ -521,6 +558,3 @@
             modifyUser: null
         };
     }
-
-
-
