@@ -1,4 +1,13 @@
 // Conversion functions
+const CONVERTER_VERSION = '__VERSION__';
+
+function getConverterVersion() {
+    if (typeof CONVERTER_VERSION === 'string' && CONVERTER_VERSION !== '__VERSION__') {
+        return CONVERTER_VERSION;
+    }
+    return 'dev';
+}
+
 function generateUUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
         const r = Math.random() * 16 | 0;

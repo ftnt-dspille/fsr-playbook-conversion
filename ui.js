@@ -14,6 +14,22 @@ const statsGrid = document.getElementById('statsGrid');
 const inputBadge = document.getElementById('inputBadge');
 const outputBadge = document.getElementById('outputBadge');
 const convertBtnText = document.getElementById('convertBtnText');
+const appVersion = document.getElementById('appVersion');
+
+async function loadAppVersion() {
+    if (!appVersion) return;
+
+    try {
+        const response = await fetch('VERSION', {cache: 'no-store'});
+        if (!response.ok) throw new Error('VERSION not found');
+        const versionText = (await response.text()).trim();
+        appVersion.textContent = `Version ${versionText || getConverterVersion()}`;
+    } catch (error) {
+        appVersion.textContent = `Version ${getConverterVersion()}`;
+    }
+}
+
+loadAppVersion();
 
 // Direction selection
 function setDirection(direction) {
