@@ -171,10 +171,14 @@ function convertPlaybookToWorkflow(playbook, fsrCollection) {
             // Fix connector steps - ensure simplified structure for FSR
             if (stepArguments.connector) {
                 stepArguments = {
-                    config: stepArguments.config || '',
+                    name: stepArguments.name || stepArguments.connector.toUpperCase(),
+                    // Config can't be passed cleanly.
+                    config: '',
                     version: stepArguments.version || '1.0.0',
+                    params: stepArguments.params || {},
                     from_str: stepArguments.from_str || stepArguments.params?.from || '',
                     connector: stepArguments.connector,
+                    operation: stepArguments.operation || '',
                     step_variables: stepArguments.step_variables || []
                 };
             }
