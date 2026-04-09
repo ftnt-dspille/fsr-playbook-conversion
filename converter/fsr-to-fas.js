@@ -86,7 +86,7 @@ function convertFSRtoFAS(fsrJson) {
                 if (playbook._conversionStats) {
                     const unsupportedSteps = playbook._conversionStats.unsupportedSteps.filter(s => s.category === 'unsupported');
                     const unknownSteps = playbook._conversionStats.unsupportedSteps.filter(s => s.category === 'unknown');
-                    const manualStartSteps = playbook._conversionStats.supportedSteps.filter(s => s.note && s.note.includes('Manual start'));
+                    const manualStartSteps = playbook._conversionStats.supportedSteps.filter(s => s.note && s.note.includes('converted to referenced start'));
 
                     // Track unsupported steps
                     if (unsupportedSteps.length > 0) {
