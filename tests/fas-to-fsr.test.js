@@ -338,6 +338,57 @@ describe('convertFAStoFSR — manual input step_uuid fix', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Start step — force FSR-style triggers to referenced start
+// ---------------------------------------------------------------------------
+describe('convertFAStoFSR — start step forced to referenced', () => {
+    // FSR-style start type UUIDs (Manual Start, On Create, On Update, API Endpoint)
+    const FSR_MANUAL_START  = 'f414d039-bb0d-4e59-9c39-a8f1e880b18a';
+    const FSR_ON_CREATE     = 'ea155646-3821-4542-9702-b246da430a8d';
+    const FSR_ON_UPDATE     = '9300bf69-5063-486d-b3a6-47eb9da24872';
+    const FSR_API_ENDPOINT  = 'df26c7a2-4166-4ca5-91e5-548e24c01b5f';
+    const EXPECTED_STEP_TYPE = `/api/3/workflow_step_types/${FAS_START_TYPE}`;
+
+    [
+        ['Manual Start', FSR_MANUAL_START],
+        ['On Create',    FSR_ON_CREATE],
+        ['On Update',    FSR_ON_UPDATE],
+        ['API Endpoint', FSR_API_ENDPOINT],
+    ].forEach(([label, fsrStartType]) => {
+        it(`converts ${label} step to FAS referenced start type`, () => {
+            const fas = makeFasCollection({
+                playbooks: [
+                    makeSimplePlaybook({
+                        steps: [
+                            makeFasStep(STEP_START_UUID, 'Start', fsrStartType, '30', '300'),
+                        ],
+                        routes: [],
+                    }),
+                ],
+            });
+            const result = convert(fas);
+            const step = result.data[0].workflows[0].steps[0];
+            expect(step.stepType).toBe(EXPECTED_STEP_TYPE);
+        });
+    });
+
+    it('preserves FAS referenced start type unchanged', () => {
+        const fas = makeFasCollection({
+            playbooks: [
+                makeSimplePlaybook({
+                    steps: [
+                        makeFasStep(STEP_START_UUID, 'Start', FAS_START_TYPE, '30', '300'),
+                    ],
+                    routes: [],
+                }),
+            ],
+        });
+        const result = convert(fas);
+        const step = result.data[0].workflows[0].steps[0];
+        expect(step.stepType).toBe(EXPECTED_STEP_TYPE);
+    });
+});
+
+// ---------------------------------------------------------------------------
 // Route mapping
 // ---------------------------------------------------------------------------
 describe('convertFAStoFSR — route mapping', () => {

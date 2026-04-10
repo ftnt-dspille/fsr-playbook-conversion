@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "generate-schema": "node scripts/generate-schema.js"
   },
   "devDependencies": {
     "vitest": "^2.0.0"

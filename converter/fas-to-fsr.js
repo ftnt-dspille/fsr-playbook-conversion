@@ -130,6 +130,11 @@ function convertPlaybookToWorkflow(playbook, fsrCollection) {
             const originalTop = parseInt(step.top) || 0;
             const originalLeft = parseInt(step.left) || 0;
 
+            // Force any FSR-style start step types to the FAS referenced start type.
+            // FAS only supports referenced starts; FSR-specific trigger types (Manual,
+            // On Create, On Update, API Endpoint) are not valid in this direction.
+            const stepType = isFSRStartStep(step.stepType) ? FAS_START_STEP_TYPE : step.stepType;
+
             let stepArguments = step.arguments || {};
 
             // Fix decision step conditions - add /api/3/workflow_steps/ prefix to step_iri
@@ -191,7 +196,7 @@ function convertPlaybookToWorkflow(playbook, fsrCollection) {
                 status: step.status || null,
                 top: String(originalTop + topOffset),
                 left: String(originalLeft + leftOffset),
-                stepType: `/api/3/workflow_step_types/${step.stepType}`,
+                stepType: `/api/3/workflow_step_types/${stepType}`,
                 group: step.workflowgroup || null,
                 uuid: step.uuid || generateUUID()
             };
