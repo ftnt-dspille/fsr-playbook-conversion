@@ -1,0 +1,66 @@
+================================================================
+PLAYBOOK COLLECTION SCHEMA REPORT
+================================================================
+Source      : all_fsm_fndn_collections_2.json
+Export type : playbook_collections
+Collections : 23
+Playbooks   : 59
+Total steps : 484
+Step types  : 10 unique
+
+----------------------------------------------------------------
+TOP PLAYBOOKS BY STEP COUNT
+----------------------------------------------------------------
+  Steps  Unique Types  Playbook Name (Collection)
+     55             4  Incident IOC investigations (003 - Enrichment)
+     25             4  Remove & Disable new Domain Adminstrator User account (Advanced) (002 - Remediations)
+     23             5  AD Compromised User - Reset and Optionally Disable Password (002 - Remediations)
+     17             5  AD Compromised User - Reset Password (002 - Remediations)
+     13             5  Quarantine IP on FortiGate - With IP Selection Assign To Team Members (002 - Remediations)
+     11             3  Incident Summary (001 - Investigate Incident)
+     11             3  Remove & Disable new Domain Administrator User account (002 - Remediations)
+     10             5  Unauthorized new AD User1 (Student1)
+     10             4  Block Source IP in CheckPoint Firewall-1 (002 - Remediations)
+     10             4  Block Source IP in Cisco ASA (002 - Remediations)
+     10             4  Block Source IP in FortiGate (002 - Remediations)
+     10             4  Block Source IP in Palo Alto Firewall (002 - Remediations)
+     10             4  Disable User in Active Directory (002 - Remediations)
+     10             4  Disable User in Linux (002 - Remediations)
+     10             4  Quarantine Compromised Source IP at FortiGate (002 - Remediations)
+
+----------------------------------------------------------------
+TOP PLAYBOOKS BY UNIQUE STEP TYPES
+----------------------------------------------------------------
+  Types    Steps  Playbook Name (Collection)
+      5       10  Unauthorized new AD User1 (Student1)
+      5        7  Get IOCs of Ransomware Group (Ransomware Intelligence)
+      5        5  Get Intelligence Reportings on Ransomware Group (Ransomware Intelligence)
+      5        5  Ransomware Group Profile (Ransomware Intelligence)
+      5        5  Get FortiRecon Severity of the CVE (Vulnerability Intelligence)
+      5        5  Get FortiRecon Context of Vulnerability (Vulnerability Intelligence)
+      5        7  Get IOCs of Exploited CVE (Vulnerability Intelligence)
+      5       23  AD Compromised User - Reset and Optionally Disable Password (002 - Remediations)
+      5       17  AD Compromised User - Reset Password (002 - Remediations)
+      5       13  Quarantine IP on FortiGate - With IP Selection Assign To Team Members (002 - Remediations)
+      5        7  Get IOCs of APT group (APT Intelligence)
+      5        5  Get Intelligence Reportings on APT Group (APT Intelligence)
+      5        5  Get Advisories of Particular CERT (CERT Advisories)
+      4        4  TestHP (Draft)
+      4        8  Unauthorized new AD User NC (NC Playbook)
+
+----------------------------------------------------------------
+ALL STEP TYPES (sorted by occurrences desc)
+----------------------------------------------------------------
+  Count  Playbooks  UUID                                  Label
+    177         49  0bfed618-0316-11e7-93ae-92361f002671  Connector
+    171         57  04d0cf46-b6a8-42c4-8683-60a7eaa69e8f  Set Variables
+     36         36  b348f017-9a94-471f-87f8-ce88b6a7ad62  Start/Trigger (FAS Referenced)
+     26         26  74932bdc-b8b6-4d24-88c4-1a4dfbc524f3  Reference Playbook
+     23         23  202ecbe9-e4b9-4f71-9fd9-66a054b5443f  Application Event (FAS only — no FSR equivalent)
+     21         21  fc04082a-d7dc-4299-96fb-6837b1baa0fe  Manual Input
+     17          7  12254cf5-5db7-4b1a-8cb1-3af081924b28  Decision
+     10         10  0109f35d-090b-4a2b-bd8a-94cbc3508562  Utility/No-Op
+      2          2  4c0019b2-055c-44d0-968c-678a0c2d762e  Send Email (SMTP connector shortcut)
+      1          1  6832e556-b9c7-497a-babe-feda3bd27dbf  Wait
+
+================================================================
