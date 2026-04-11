@@ -5,7 +5,6 @@ const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
 const inputText = document.getElementById('inputText');
 const outputText = document.getElementById('outputText');
-const convertBtn = document.getElementById('convertBtn');
 const downloadBtn = document.getElementById('downloadBtn');
 const copyBtn = document.getElementById('copyBtn');
 const clearBtn = document.getElementById('clearBtn');
@@ -13,8 +12,12 @@ const statusMsg = document.getElementById('statusMsg');
 const statsGrid = document.getElementById('statsGrid');
 const inputBadge = document.getElementById('inputBadge');
 const outputBadge = document.getElementById('outputBadge');
-const convertBtnText = document.getElementById('convertBtnText');
 const appVersion = document.getElementById('appVersion');
+const diffBtn = document.getElementById('diffBtn');
+
+let lastInputJson = null;
+let lastOutputJson = null;
+let diffVisible = false;
 
 async function loadAppVersion() {
     if (!appVersion) return;
@@ -31,34 +34,20 @@ async function loadAppVersion() {
 
 loadAppVersion();
 
-// Direction selection
+// Direction selection (called only from auto-detection)
 function setDirection(direction) {
     currentDirection = direction;
-
-    document.getElementById('fsrToFasBtn').classList.toggle('active', direction === 'fsr-to-fas');
-    document.getElementById('fasToFsrBtn').classList.toggle('active', direction === 'fas-to-fsr');
 
     if (direction === 'fsr-to-fas') {
         inputBadge.textContent = 'FSR';
         inputBadge.className = 'badge badge-fsr';
         outputBadge.textContent = 'FAS';
         outputBadge.className = 'badge badge-fas';
-        convertBtnText.textContent = 'Convert FSR → FAS';
     } else {
         inputBadge.textContent = 'FAS';
         inputBadge.className = 'badge badge-fas';
         outputBadge.textContent = 'FSR';
         outputBadge.className = 'badge badge-fsr';
-        convertBtnText.textContent = 'Convert FAS → FSR';
-    }
-
-    // Don't clear if we're auto-detecting, only on manual change
-    const hasContent = inputText.value.trim().length > 0;
-    if (!hasContent) {
-        clearAll();
-    } else {
-        // Just hide the detection banner on manual switch
-        document.getElementById('detectionBanner').style.display = 'none';
     }
 }
 
@@ -98,6 +87,24 @@ function runConversion() {
             return;
         }
 
+        // Parse early for validation
+        let inputData;
+        try {
+            inputData = JSON.parse(input);
+        } catch (parseErr) {
+            showStatus('❌ Invalid JSON: ' + parseErr.message, 'error');
+            return;
+        }
+
+        const format = currentDirection === 'fsr-to-fas' ? 'fsr' : 'fas';
+        const { errors, warnings } = validateInput(inputData, format);
+        showValidationResults(errors, warnings);
+
+        if (errors.length > 0) {
+            showStatus('❌ Validation failed — see errors below', 'error');
+            return;
+        }
+
         let result;
         if (currentDirection === 'fsr-to-fas') {
             result = convertFSRtoFAS(input);
@@ -108,10 +115,18 @@ function runConversion() {
         const output = JSON.stringify(result, null, 2);
         outputText.value = output;
 
+        lastInputJson = input;
+        lastOutputJson = output;
+        diffVisible = false;
+        diffBtn.disabled = false;
+        diffBtn.querySelector('span').textContent = 'Show Diff';
+        document.getElementById('diffPanel').style.display = 'none';
+
         downloadBtn.disabled = false;
         copyBtn.disabled = false;
 
         updateStats(result, currentDirection);
+        renderStepStatusPanel(result, currentDirection);
         showConversionInfo(result, currentDirection);
         showStatus('✅ Conversion successful!', 'success');
     } catch (error) {
@@ -126,7 +141,7 @@ function loadFile(file) {
         try {
             const content = e.target.result;
             const data = JSON.parse(content);
-            inputText.value = content;
+            inputText.value = JSON.stringify(data, null, 2);
 
             // Auto-detect format
             const detectedInfo = detectFormat(data);
@@ -262,7 +277,21 @@ function debounce(func, wait) {
 }
 
 // Convert button
-convertBtn.addEventListener('click', runConversion);
+
+// Diff button
+diffBtn.addEventListener('click', () => {
+    const panel = document.getElementById('diffPanel');
+    if (diffVisible) {
+        panel.style.display = 'none';
+        diffBtn.querySelector('span').textContent = 'Show Diff';
+        diffVisible = false;
+    } else {
+        const diff = computeConversionDiff(lastInputJson, lastOutputJson);
+        renderDiffPanel(diff);
+        diffBtn.querySelector('span').textContent = 'Hide Diff';
+        diffVisible = true;
+    }
+});
 
 // Download button
 downloadBtn.addEventListener('click', () => {
@@ -295,10 +324,16 @@ function clearAll() {
     outputText.value = '';
     downloadBtn.disabled = true;
     copyBtn.disabled = true;
+    diffBtn.disabled = true;
+    diffVisible = false;
+    lastInputJson = null;
+    lastOutputJson = null;
     statsGrid.style.display = 'none';
     document.getElementById('conversionInfo').style.display = 'none';
     document.getElementById('validationInfo').style.display = 'none';
     document.getElementById('detectionBanner').style.display = 'none';
+    document.getElementById('stepStatusPanel').style.display = 'none';
+    document.getElementById('diffPanel').style.display = 'none';
     fileInput.value = '';
     hideStatus();
 }
@@ -582,7 +617,13 @@ function showConversionInfo(data, direction) {
                 </details>
             `;
     } else {
-        infoPanel.innerHTML = `
+        // Inject trigger-loss warnings at the top if present
+        const warnings = buildFasToFsrWarnings(data);
+        infoPanel.textContent = '';
+        if (warnings.childNodes.length > 0) {
+            infoPanel.appendChild(warnings);
+        }
+        infoPanel.innerHTML += `
                 <h3>🔍 Conversion Details</h3>
                 <ul>
                     <li>Changed type: "playbook_collections" → "workflow_collections"</li>

@@ -2,7 +2,7 @@
  * Auto-generated step-type schema
  * Source    : all_fsr_evoke_playbooks.json
  * Type      : workflow_collections
- * Generated : 2026-04-11T13:09:24.839Z
+ * Generated : 2026-04-11T17:46:19.161Z
  * Collections: 119  |  Total steps: 6618  |  Step types: 21
  * Mode      : default (low-frequency keys collapsed into [key: string]: unknown)
  *

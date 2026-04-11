@@ -2,7 +2,7 @@
  * Auto-generated step-type schema
  * Source    : all_fsm_fndn_collections_2.json
  * Type      : playbook_collections
- * Generated : 2026-04-11T13:09:24.808Z
+ * Generated : 2026-04-11T17:46:19.132Z
  * Collections: 23  |  Total steps: 484  |  Step types: 10
  * Mode      : default (low-frequency keys collapsed into [key: string]: unknown)
  *

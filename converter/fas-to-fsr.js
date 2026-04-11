@@ -36,7 +36,12 @@ function convertFAStoFSR(fasJson) {
     const fsr = {
         type: 'workflow_collections',
         data: [],
-        exported_tags: []
+        exported_tags: [],
+        _conversionSummary: {
+            totalTriggerTypesNormalized: 0,
+            normalizedByType: {},
+            playbooksWithTriggerChanges: []
+        }
     };
 
     fas.data.forEach(collection => {
@@ -60,6 +65,24 @@ function convertFAStoFSR(fasJson) {
         if (collection.playbooks) {
             collection.playbooks.forEach(playbook => {
                 const workflow = convertPlaybookToWorkflow(playbook, fsrCollection);
+
+                if (workflow._conversionStats) {
+                    const { triggerChanges } = workflow._conversionStats;
+                    if (triggerChanges.length > 0) {
+                        fsr._conversionSummary.totalTriggerTypesNormalized += triggerChanges.length;
+                        fsr._conversionSummary.playbooksWithTriggerChanges.push({
+                            name: workflow.name,
+                            uuid: workflow.uuid,
+                            triggerChanges
+                        });
+                        triggerChanges.forEach(change => {
+                            fsr._conversionSummary.normalizedByType[change.fromTypeName] =
+                                (fsr._conversionSummary.normalizedByType[change.fromTypeName] || 0) + 1;
+                        });
+                    }
+                    delete workflow._conversionStats;
+                }
+
                 fsrCollection.workflows.push(workflow);
             });
         }
@@ -88,6 +111,8 @@ function convertPlaybookToWorkflow(playbook, fsrCollection) {
     // Apply offset to ensure steps are visible (minimum 30px from top/left)
     const topOffset = minTop < 30 ? (30 - minTop) : 0;
     const leftOffset = minLeft < 300 ? (300 - minLeft) : 0;
+
+    const conversionStats = { triggerChanges: [] };
 
     const workflow = {
         '@type': 'Workflow',
@@ -135,9 +160,9 @@ function convertPlaybookToWorkflow(playbook, fsrCollection) {
             //    are not valid FSR import targets and must be replaced.
             //  - FAS-only triggers (Application Event) have no FSR equivalent and
             //    must also be mapped to the referenced start.
-            const stepType = (isFSRStartStep(step.stepType) || isFASOnlyTriggerStep(step.stepType))
-                ? FAS_START_STEP_TYPE
-                : step.stepType;
+            const needsNormalization = step.stepType !== FAS_START_STEP_TYPE &&
+                (isFSRStartStep(step.stepType) || isFASOnlyTriggerStep(step.stepType));
+            const stepType = needsNormalization ? FAS_START_STEP_TYPE : step.stepType;
 
             let stepArguments = step.arguments || {};
 
@@ -215,6 +240,19 @@ function convertPlaybookToWorkflow(playbook, fsrCollection) {
                 uuid: step.uuid || generateUUID()
             };
             workflow.steps.push(fsrStep);
+
+            if (needsNormalization) {
+                const fromTypeName = isFASOnlyTriggerStep(step.stepType)
+                    ? (FAS_ONLY_TRIGGER_STEP_TYPES[step.stepType] || 'Application Event')
+                    : (FSR_START_STEP_TYPES[step.stepType] || `Unknown (${step.stepType})`);
+                conversionStats.triggerChanges.push({
+                    name: step.name || 'Unnamed',
+                    uuid: step.uuid,
+                    fromType: step.stepType,
+                    fromTypeName,
+                    toTypeName: 'Referenced Start'
+                });
+            }
         });
     }
 
@@ -234,5 +272,6 @@ function convertPlaybookToWorkflow(playbook, fsrCollection) {
         });
     }
 
+    workflow._conversionStats = conversionStats;
     return workflow;
 }

@@ -16,18 +16,7 @@
         <p>Seamless conversion between FSR and FAS formats</p>
     </div>
 
-    <div class="direction-selector">
-        <div class="direction-btn active" id="fsrToFasBtn" onclick="setDirection('fsr-to-fas')">
-            <h3>FSR → FAS</h3>
-            <p>Convert FortiSOAR to Cloud Platform</p>
-        </div>
-        <div class="direction-btn" id="fasToFsrBtn" onclick="setDirection('fas-to-fsr')">
-            <h3>FAS → FSR</h3>
-            <p>Convert Cloud Platform to FortiSOAR</p>
-        </div>
-    </div>
-
-    <div id="detectionBanner" class="info-panel"
+<div id="detectionBanner" class="info-panel"
          style="display: none; background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(123, 97, 255, 0.1)); border-color: var(--accent-primary);">
         <h3>Auto-Detection</h3>
         <p id="detectionText" style="color: var(--text-secondary); margin-top: 10px;"></p>
@@ -38,6 +27,7 @@
             <div class="icon">📁</div>
             <h3>Drop your JSON file here</h3>
             <p>or click to browse</p>
+            <p class="drop-hint">Format (FSR or FAS) is detected automatically</p>
             <input type="file" id="fileInput" accept=".json">
         </div>
     </div>
@@ -65,10 +55,7 @@
     </div>
 
     <div class="actions">
-        <button class="btn-primary" id="convertBtn">
-            <span id="convertBtnText">Convert FSR → FAS</span>
-        </button>
-        <button class="btn-success" id="downloadBtn" disabled>
+<button class="btn-success" id="downloadBtn" disabled>
             <span>Download JSON</span>
         </button>
         <button class="btn-secondary" id="copyBtn" disabled>
@@ -76,6 +63,9 @@
         </button>
         <button class="btn-secondary" id="clearBtn">
             <span>Clear</span>
+        </button>
+        <button class="btn-secondary" id="diffBtn" disabled>
+            <span>Show Diff</span>
         </button>
     </div>
 
@@ -100,8 +90,10 @@
         </div>
     </div>
 
-    <div class="info-panel" id="conversionInfo"></div>
+    <div class="info-panel" id="diffPanel"></div>
     <div class="info-panel" id="validationInfo"></div>
+    <div class="info-panel" id="stepStatusPanel"></div>
+    <div class="info-panel" id="conversionInfo"></div>
 
     <div class="version" id="appVersion"></div>
     <div class="author" id="appAuthor">Author: Dylan Spille — Fortinet CSE</div>
@@ -112,6 +104,7 @@
     </div>
 </div>
 
+<script src="ui-features.js"></script>
 <script src="ui.js"></script>
 </body>
 </html>

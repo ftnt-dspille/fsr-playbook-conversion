@@ -912,6 +912,15 @@ function buildSummaryReport(index, meta) {
       // Show a sample of step names to help the user identify the type
       const sample = typeData.stepNames.slice(0, 3);
       for (const s of sample) lines.push(`    sample: "${s}"`);
+      // Show one full step JSON so the user can inspect all fields
+      if (typeData.rawEntries.length > 0) {
+        const sampleStep = typeData.rawEntries[0].step;
+        const json = JSON.stringify(sampleStep, null, 2);
+        lines.push(`    step json:`);
+        for (const jsonLine of json.split('\n')) {
+          lines.push(`      ${jsonLine}`);
+        }
+      }
     }
     lines.push('');
   }
@@ -1141,6 +1150,30 @@ function buildComparisonReport(fasIndex, fsrIndex, fasFiles, fsrFiles) {
 
   if (sharedDiffsFound === 0) {
     lines.push('  (no argument shape differences found in shared step types)');
+    lines.push('');
+  }
+
+  // ── Top playbooks by unique step types per source ─────────────────────────
+  const TOP_N = 10;
+  lines.push(dash);
+  lines.push(`TOP ${TOP_N} PLAYBOOKS BY UNIQUE STEP TYPES — per source`);
+  lines.push(dash);
+
+  for (const [label, idx] of [['FAS', fasIndex], ['FSR', fsrIndex]]) {
+    lines.push(`  ${label}:`);
+    lines.push(`  ${'Types'.padStart(5)}  ${'Steps'.padStart(6)}  Playbook Name (Collection)`);
+    const top = [...idx.playbookStats.values()]
+      .sort((a, b) => b.stepTypeSet.size - a.stepTypeSet.size || b.stepCount - a.stepCount)
+      .slice(0, TOP_N);
+    if (top.length === 0) {
+      lines.push('    (none)');
+    } else {
+      for (const pb of top) {
+        const types = String(pb.stepTypeSet.size).padStart(5);
+        const steps = String(pb.stepCount).padStart(6);
+        lines.push(`  ${types}  ${steps}  ${pb.name} (${pb.collectionName})`);
+      }
+    }
     lines.push('');
   }
 
