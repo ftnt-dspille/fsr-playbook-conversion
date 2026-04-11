@@ -69,6 +69,8 @@ const UNSUPPORTED_STEP_TYPES = {
 const SUPPORTED_STEP_TYPES = {
     // Start/Trigger Steps (FAS referenced only)
     'b348f017-9a94-471f-87f8-ce88b6a7ad62': 'Start/Trigger (FAS Referenced)',
+    // Application Event (FAS only — converted to referenced start when going FAS → FSR)
+    '202ecbe9-e4b9-4f71-9fd9-66a054b5443f': 'Application Event',
     // Set Variables / Configuration
     '04d0cf46-b6a8-42c4-8683-60a7eaa69e8f': 'Set Variables',
     // Decision
@@ -95,6 +97,13 @@ const SET_VARIABLE_STEP_TYPE = '04d0cf46-b6a8-42c4-8683-60a7eaa69e8f';
 // FAS Start/Trigger step type (referenced only)
 const FAS_START_STEP_TYPE = 'b348f017-9a94-471f-87f8-ce88b6a7ad62';
 
+// FAS-only trigger step types that have no FSR equivalent and must be
+// converted to the FAS referenced start type when going FAS → FSR.
+const FAS_ONLY_TRIGGER_STEP_TYPES = {
+    // Application Event (FAS only — no FSR equivalent)
+    '202ecbe9-e4b9-4f71-9fd9-66a054b5443f': 'Application Event'
+};
+
 // Step types whose arguments use the connector shape (connector/operation/params/from_str).
 // Excludes Utility/No-Op, which also carries a `connector` field but uses a different params shape.
 const CONNECTOR_LIKE_STEP_TYPES = {
@@ -118,6 +127,10 @@ function isSupportedStepType(stepTypeUuid) {
 
 function isFSRStartStep(stepTypeUuid) {
     return FSR_START_STEP_TYPES.hasOwnProperty(stepTypeUuid);
+}
+
+function isFASOnlyTriggerStep(stepTypeUuid) {
+    return FAS_ONLY_TRIGGER_STEP_TYPES.hasOwnProperty(stepTypeUuid);
 }
 
 function isUnknownStepType(stepTypeUuid) {

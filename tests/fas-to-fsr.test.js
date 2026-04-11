@@ -481,6 +481,23 @@ describe('convertFAStoFSR — start step forced to referenced', () => {
         });
     });
 
+    it('converts Application Event (FAS-only trigger) to FAS referenced start type', () => {
+        const APPLICATION_EVENT_TYPE = '202ecbe9-e4b9-4f71-9fd9-66a054b5443f';
+        const fas = makeFasCollection({
+            playbooks: [
+                makeSimplePlaybook({
+                    steps: [
+                        makeFasStep(STEP_START_UUID, 'App Event', APPLICATION_EVENT_TYPE, '30', '300'),
+                    ],
+                    routes: [],
+                }),
+            ],
+        });
+        const result = convert(fas);
+        const step = result.data[0].workflows[0].steps[0];
+        expect(step.stepType).toBe(EXPECTED_STEP_TYPE);
+    });
+
     it('preserves FAS referenced start type unchanged', () => {
         const fas = makeFasCollection({
             playbooks: [

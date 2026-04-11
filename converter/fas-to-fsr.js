@@ -130,10 +130,14 @@ function convertPlaybookToWorkflow(playbook, fsrCollection) {
             const originalTop = parseInt(step.top) || 0;
             const originalLeft = parseInt(step.left) || 0;
 
-            // Force any FSR-style start step types to the FAS referenced start type.
-            // FAS only supports referenced starts; FSR-specific trigger types (Manual,
-            // On Create, On Update, API Endpoint) are not valid in this direction.
-            const stepType = isFSRStartStep(step.stepType) ? FAS_START_STEP_TYPE : step.stepType;
+            // Normalise trigger step types to the FAS referenced start type:
+            //  - FSR-specific triggers (Manual, On Create, On Update, API Endpoint)
+            //    are not valid FSR import targets and must be replaced.
+            //  - FAS-only triggers (Application Event) have no FSR equivalent and
+            //    must also be mapped to the referenced start.
+            const stepType = (isFSRStartStep(step.stepType) || isFASOnlyTriggerStep(step.stepType))
+                ? FAS_START_STEP_TYPE
+                : step.stepType;
 
             let stepArguments = step.arguments || {};
 
