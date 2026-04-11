@@ -2,7 +2,7 @@
  * Auto-generated step-type schema
  * Source    : all_fsm_fndn_collections_2.json
  * Type      : playbook_collections
- * Generated : 2026-04-10T02:12:15.794Z
+ * Generated : 2026-04-11T13:09:24.808Z
  * Collections: 23  |  Total steps: 484  |  Step types: 10
  * Mode      : default (low-frequency keys collapsed into [key: string]: unknown)
  *
@@ -150,22 +150,22 @@ export interface ApplicationEventArgs {
   connector_label: string;
   connector_mapping: {
     datetime: {
-      to: string;
       from: string;
+      to: string;
     };
     response: string;
   };
   connector_name: string;
   connector_version: string;
   createUser_id: null;
-  description: string;
+  description: string;  // [system key]
   event_id: string;
   exit_if_running: boolean;
   installed_by: string;
   modifyUser_id: null;
-  name: string;
+  name: string;  // [system key]
   poll: null;
-  sample_data: ({
+  sample_data: (({
       count: number;
       customer: string;
       eventName: string;
@@ -192,7 +192,7 @@ export interface ApplicationEventArgs {
       phIncidentCategory: number;
       incidentClearedTime: number;
       phSubIncidentCategory: string;
-    }[] | string[] | {
+    } | string | {
       count: number;
       customer: string;
       eventName: string;
@@ -217,28 +217,23 @@ export interface ApplicationEventArgs {
       incidentClearedTime: number;
       incidentClearedReason: string;
       phSubIncidentCategory: string;
-    }[]);
+    }))[];
   schedule: null;
   start_time: null;
   tag: null;
-  trigger_condition: ({
-    sort: unknown[];
-    limit: number;
-    logic: string;
-    filters: unknown[];
-  } | {
-    sort: unknown[];
-    limit: number;
-    logic: string;
-    filters: {
-        type: string;
-        field: string;
-        value: string;
-        operator: string;
+  trigger_condition: {
+    filters: ({
         evaluation: boolean;
+        field: string;
+        operator: string;
         originalValue: string;
-      }[];
-  });
+        type: string;
+        value: string;
+      })[];
+    limit: number;
+    logic: string;
+    sort: unknown[];
+  };
   type: string[];
   uuid: string;
   agent?: string;  // present in 10/23 instances
@@ -258,12 +253,10 @@ export interface ApplicationEventArgs {
  * Instances: 171 step(s) across 57 playbook(s)
  */
 export interface SetVariablesArgs {
-  for_each?: ({
+  for_each?: {
     item: string;
-  } | {
-    item: string;
-    parallel: boolean;
-  });  // present in 2/171 instances [system key]
+    parallel?: boolean;
+  };  // present in 2/171 instances [system key]
   /** ~139 additional dynamic keys (user-defined variable / output names) */
   [key: string]: unknown;
 }
@@ -276,238 +269,20 @@ export interface SetVariablesArgs {
  */
 export interface ConnectorArgs {
   agent: string;
-  config: string;
-  connector: string;
-  name: string;
-  operation: string;
-  params: ({
-    note: string;
-    stage: string;
-    status: string;
-    dueDate: string;
-    summary: string;
-    assignee: string;
-    severity: string;
-    incidentIds: string;
-    organization: string;
-    caseMgmtPolicy: string;
-  } | {
-    search_attr_name: string;
-    search_attr_value: string;
-  } | {
-    search_object: string;
-    search_attr_value: string;
-  } | {
-    group_dn: string;
-    object_dn: string;
-    object_class: string;
-  } | {
-    note: string;
-    stage: string;
-    caseId: string;
-    status: string;
-    dueDate: string;
-    summary: string;
-    assignee: string;
-    severity: string;
-    incidentIds: string;
-    caseMgmtPolicy: string;
-  } | {
-    body: string;
-    subject: string;
-    iri_list: string;
-    cc_recipients: string;
-    to_recipients: string;
-    bcc_recipients: string;
-  } | {
-    timeTo: string;
-    perPage: number;
-    timeFrom: string;
-    incident_id: string;
-  } | {
-    comments: string;
-    severity: string;
-    incidentId: string;
-    resolution: string;
-    actionStatus: string;
-    incidentStatus: string;
-    externalTicketId: string;
-    externalTicketType: string;
-    externalTicketState: string;
-    externalAssignedUser: string;
-  } | {
-    id: string;
-    comment_text: string;
-  } | {
-    start: number;
-    perPage: number;
-    sql_query: string;
-    query_type: string;
-  } | {
-    parent: string;
-    priority: string;
-    issue_type: string;
-    project_key: string;
-    other_fields: string;
-    ticket_summary: string;
-    ticket_description: string;
-  } | Record<string, never> | {
-    cc: string;
-    to: string;
-    bcc: string;
-    from: string;
-    type: string;
-    content: string;
-    subject: string;
-    iri_list: string;
-    body_type: string;
-    file_name: string;
-    file_path: string;
-  } | {
-    tag: string;
-    iocs: string;
-    page: string;
-    size: number;
-    source: string;
-    keyword: string;
-    end_date: string;
-    report_id: string;
-    industries: string;
-    start_date: string;
-    adversaries: string;
-    geographies: string;
-    motivations: string;
-    report_type: string;
-    source_category: string;
-    insight_relevance: string;
-    source_reliability: string;
-    information_reliability: string;
-    report_generator_source: string;
-  } | {
-    name: string;
-    page: string;
-    size: number;
-    sort: string;
-    type: string;
-    keyword: string;
-    last_seen: string;
-    first_seen: string;
-    report_ids: string;
-    get_all_records: boolean;
-  } | {
-    group_name: string;
-  } | {
-    page: string;
-    size: number;
-  } | {
-    id: string;
-  } | {
-    id: string;
-    page: string;
-    size: number;
-    based_on: string;
-  } | {
-    new_password: string;
-    search_attr_name: string;
-    search_attr_value: string;
-  } | {
-    ip_address_list: string;
-  } | {
-    src: string;
-    dest: string;
-    direction: string;
-    interface: string;
-    access_list: string;
-  } | {
-    ip: string;
-    vdom: string;
-    is_new: boolean;
-    method: string;
-    ip_type: string;
-    ngfw_mode: string;
-    ip_group_name: string;
-    ip_block_policy: string;
-  } | {
-    ip: string;
-  } | {
-    size: number;
-    stat: number;
-  } | {
-    name: string;
-    columnList: {
-        key: boolean;
-        name: string;
-        type: string;
-      }[];
-    description: string;
-    organizationName: string;
-  } | {
-    cmd: string;
-    allowed_exit: string;
-    is_super_user: boolean;
-  } | {
-    vdom: string;
-    method: string;
-    ip_addresses: string;
-    time_to_live: string;
-  } | {
-    cookie: string;
-    page_size: string;
-    size_limit: string;
-    search_object: string;
-    search_attr_name: string;
-    search_attr_value: string;
-  } | {
-    size: number;
-    start: number;
-    sortBy: string;
-    searchText: string;
-    lookupTableId: string;
-  } | {
-    ip: string;
-    relationships: string;
-  } | {
-    domain: string;
-    relationships: string;
-  } | {
-    url: string;
-    relationships: string;
-  } | {
-    cond: string;
-    start: number;
-    value: number;
-    groupby: string;
-    orderby: string;
-    perPage: number;
-    AttrList: string;
-    rel_time: string;
-    query_type: string;
-    time_selection: string;
-  } | {
-    fast: boolean;
-    mobile: boolean;
-    ip_address: string;
-    strictness: number;
-    user_agent: string;
-    user_language: string;
-    lighter_penalties: boolean;
-    transaction_strictness: number;
-    allow_public_access_points: boolean;
-  } | {
-    url: string;
-    fast: boolean;
-    strictness: number;
-  });
+  config: string;  // [system key]
+  connector: string;  // [system key]
+  name: string;  // [system key]
+  operation: string;  // [system key]
+  params: Record<string, unknown>;  // [system key]
   pickFromTenant: boolean;
-  version: string;
+  version: string;  // [system key]
   apply_async?: boolean;  // present in 5/177 instances
   ignore_errors?: boolean;  // present in 11/177 instances [system key]
   mock_result?: string;  // present in 6/177 instances
-  step_variables?: (Record<string, never> | {
-    _evt_fulldetail: string;
-  } | {
-    jiraProjectID: string;
-  });  // present in 4/177 instances [system key]
+  step_variables?: {
+    _evt_fulldetail?: string;
+    jiraProjectID?: string;
+  };  // present in 4/177 instances [system key]
 }
 
 /**
@@ -530,26 +305,23 @@ export interface WaitArgs {
  * Instances: 26 step(s) across 26 playbook(s)
  */
 export interface ReferencePlaybookArgs {
-  arguments: (Record<string, never> | {
-    report_data: string;
-  } | {
-    htmlTable: string;
-    markdownTable: string;
-  } | {
-    report_data: string;
-    report_details: string;
-  });
+  arguments: {
+    htmlTable?: string;
+    markdownTable?: string;
+    report_data?: string;
+    report_details?: string;
+  };
   pass_input_record: boolean;
   pass_parent_env: boolean;
   workflowReference: string;
   for_each?: {
-    item: string;
     condition: string;
+    item: string;
   };  // present in 1/26 instances [system key]
   ignore_errors?: boolean;  // present in 1/26 instances [system key]
   message?: {
-    tags: string[];
     content: string;
+    tags: string[];
   };  // present in 1/26 instances [system key]
   step_variables?: {
     test_var: string;
@@ -567,33 +339,30 @@ export interface ReferencePlaybookArgs {
  */
 export interface SendEmailArgs {
   agent: string;
-  config: string;
-  connector: string;
-  from_str: string;
-  name: string;
-  operation: string;
-  params: ({
-    cc: string;
-    to: string;
-    bcc: string;
-    from: string;
-    type: string;
-    content: string;
-    subject: string;
+  config: string;  // [system key]
+  connector: string;  // [system key]
+  from_str: string;  // [system key]
+  name: string;  // [system key]
+  operation: string;  // [system key]
+  params: {
     iri_list: string;
-    body_type: string;
-    file_name: string;
-    file_path: string;
-  } | {
-    body: string;
     subject: string;
-    iri_list: string;
-    cc_recipients: string;
-    to_recipients: string;
-    bcc_recipients: string;
-  });
+    bcc?: string;
+    bcc_recipients?: string;
+    body?: string;
+    body_type?: string;
+    cc?: string;
+    cc_recipients?: string;
+    content?: string;
+    file_name?: string;
+    file_path?: string;
+    from?: string;
+    to?: string;
+    to_recipients?: string;
+    type?: string;
+  };  // [system key]
   pickFromTenant: boolean;
-  version: string;
+  version: string;  // [system key]
 }
 
 /**
@@ -609,50 +378,32 @@ export interface ManualInputArgs {
   };
   external_channel_list: unknown[];
   inline_channel_list: unknown[];
-  input: ({
+  input: {
     schema: {
-      title: string;
       description: string;
       inputVariables: Record<string, unknown>[];
-    };
-  } | {
-    schema: {
       title: string;
-      description: string;
-      inputVariables: unknown[];
     };
-  });  // [system key]
+  };  // [system key]
   is_approval: boolean;
-  owner_detail: ({
-    isAssigned: boolean;
+  owner_detail: {
     assignedToField: null;
     assignedToPerson: unknown[];
-  } | {
     isAssigned: boolean;
-    assignedToTeam: unknown[];
-    assignedToField: null;
-    emailRecipients: string;
-    assignedToPerson: unknown[];
-    assignedToRecord: boolean;
-  });
-  response_mapping: ({
-    options: {
-        option: string;
-        primary: boolean;
-        step_iri: string;
-        step_uuid: string;
-      }[];
+    assignedToRecord?: boolean;
+    assignedToTeam?: unknown[];
+    emailRecipients?: string;
+  };
+  response_mapping: {
     connecteStepsLength: number;
     customSuccessMessage: string;
-  } | {
-    options: {
+    options: ({
         option: string;
         primary: boolean;
         step_uuid: string;
-      }[];
-    connecteStepsLength: number;
-    customSuccessMessage: string;
-  });
+        step_iri?: string;
+      })[];
+  };  // [system key]
   type: string;
   unauthenticated_input: boolean;
   /** ~11 additional dynamic keys (user-defined variable / output names) */
@@ -666,14 +417,14 @@ export interface ManualInputArgs {
  * Instances: 36 step(s) across 36 playbook(s)
  */
 export interface FASTriggerArgs {
-  __triggerLimit: boolean;
+  __triggerLimit: boolean;  // [system key]
   step_variables: {
     input: {
       params: unknown[];
     };
   };  // [system key]
-  triggerOnReplicate: boolean;
-  triggerOnSource: boolean;
+  triggerOnReplicate: boolean;  // [system key]
+  triggerOnSource: boolean;  // [system key]
 }
 
 /**
@@ -684,24 +435,22 @@ export interface FASTriggerArgs {
  */
 export interface UtilityNoOpArgs {
   agent: string;
-  config: string;
-  connector: string;
-  name: string;
-  operation: string;
-  params: ({
+  config: string;  // [system key]
+  connector: string;  // [system key]
+  name: string;  // [system key]
+  operation: string;  // [system key]
+  params: {
     data: string;
-    file_name: string;
-    save_to_file: boolean;
-  } | {
-    data: string;
-    display: string;
-    styling: boolean;
-    template: string;
-    row_fields: string;
-    show_button: boolean;
-  });
+    display?: string;
+    file_name?: string;
+    row_fields?: string;
+    save_to_file?: boolean;
+    show_button?: boolean;
+    styling?: boolean;
+    template?: string;
+  };  // [system key]
   pickFromTenant: boolean;
-  version: string;
+  version: string;  // [system key]
   step_variables?: {
     markdownTable: string;
   };  // present in 9/10 instances [system key]
@@ -714,22 +463,13 @@ export interface UtilityNoOpArgs {
  * Instances: 17 step(s) across 7 playbook(s)
  */
 export interface DecisionArgs {
-  conditions: (({
+  conditions: ({
       option: string;
       step_iri: string;
-      condition: string;
       step_name: string;
-    } | {
-      option: string;
-      default: boolean;
-      step_iri: string;
-      step_name: string;
-    })[] | {
-      option: string;
-      step_iri: string;
-      condition: string;
-      step_name: string;
-    }[]);
+      condition?: string;
+      default?: boolean;
+    })[];  // [system key]
 }
 
 // ============================================================
@@ -748,13 +488,128 @@ export type AnyStepArgs =
   | UtilityNoOpArgs
   | DecisionArgs;
 
-/** A single step as it appears inside a playbook. */
-export interface PlaybookStep {
-  uuid: string;
+// ============================================================
+// 4. Playbook & Step Structural Interfaces
+//
+//  Derived from observed playbook/step objects (excluding step
+//  arguments, which are in Section 2). Use these to validate
+//  the shape of converter output.
+// ============================================================
+
+/** Top-level playbook/workflow object (steps array excluded). */
+export interface PlaybookStructure {
+  /** e.g. "/api/workflow/playbooks/8f7abd4d-f443-4a9d-b825-31e8dd96aa62/" */
+  "@id": string;
+  /** e.g. "Workflow" */
+  "@type": string;
+  aliasName: null;
+  /** e.g. { @id, uuid, createDate, ... } */
+  collection: {
+    "@id": string;
+    "@type": string;
+    createDate: string;
+    createUser: (string | null);
+    deletedAt: null;
+    description: (string | null);
+    image: null;
+    importedBy: Record<string, never>;
+    isEditable: boolean;
+    modifyDate: string;
+    modifyUser: (string | null);
+    name: string;
+    tags: string[];
+    uuid: string;
+    visible: boolean;
+  };
+  /** e.g. "2026-03-09T13:05:10.324560Z" */
+  createDate: string;
+  /** e.g. "9180a96e-d11d-4a69-8ab7-8368ad13b639" */
+  createUser: string;
+  /** e.g. false */
+  debug: boolean;
+  deletedAt: null;
+  /** e.g. "Pull data from triggering Events and add into Incident details" */
+  description: (string | null);
+  /** e.g. [] */
+  groups: unknown[];
+  importedBy: null;
+  /** e.g. true */
+  isActive: boolean;
+  /** e.g. true */
+  isEditable: boolean;
+  /** e.g. false */
+  isPrivate: boolean;
+  /** e.g. 1775785280 */
+  lastModifyDate: (number | null);
+  /** e.g. "2026-03-09T13:05:10.324570Z" */
+  modifyDate: string;
+  /** e.g. "9180a96e-d11d-4a69-8ab7-8368ad13b639" */
+  modifyUser: (string | null);
+  /** e.g. "Student Playbook1" */
   name: string;
-  /** Raw step-type UUID — look up in STEP_TYPE_CLASSIFICATIONS */
-  stepTypeUuid: string;
+  /** e.g. [] */
+  parameters: (({
+      defaultValue: string;
+      name: string;
+      type: string;
+    })[] | null);
+  /** e.g. false */
+  pinned: boolean;
+  /** e.g. "medium" */
+  priority: string;
+  /** e.g. false */
+  remoteExecutableFlag: boolean;
+  /** e.g. [] */
+  routes: ({
+      "@id": string;
+      "@type": string;
+      data: {
+        label: string;
+      };
+      isExecuted: boolean;
+      name: string;
+      sourcestep: string;
+      targetstep: string;
+      uuid: string;
+      workflow: string;
+      workflowgroup: null;
+    })[];
+  /** e.g. false */
+  singleRecordExecution: boolean;
+  /** e.g. false */
+  synchronous: boolean;
+  /** e.g. [] */
+  tags: string[];
+  triggerLimit: null;
+  /** e.g. "940f6020-a535-4cb3-a501-84fb6672d7fe" */
+  triggerstep: (string | null);
+  /** e.g. "8f7abd4d-f443-4a9d-b825-31e8dd96aa62" */
+  uuid: string;
+}
+
+/** Step object structure (arguments field excluded — see Section 2). */
+export interface StepStructure {
+  /** e.g. "WorkflowStep" */
+  "@type": string;
+  /** e.g. "Please Update the pre-configure step:\ntimeZone to match your"..." */
+  description: (string | null);
+  /** e.g. "-205" */
+  left: string;
+  /** e.g. "Start" */
+  name: string;
+  status: null;
+  /** e.g. "202ecbe9-e4b9-4f71-9fd9-66a054b5443f" */
+  stepType: string;
+  /** e.g. "0" */
+  top: string;
+  /** e.g. "940f6020-a535-4cb3-a501-84fb6672d7fe" */
+  uuid: string;
+  /** e.g. "3850b827-70da-4552-af7e-3a9a3c9792c6" */
+  workflow: string;
+  workflowgroup: null;
+}
+
+/** A fully-typed step including its arguments. */
+export interface PlaybookStep extends StepStructure {
   arguments: AnyStepArgs;
-  top?: string;
-  left?: string;
 }
