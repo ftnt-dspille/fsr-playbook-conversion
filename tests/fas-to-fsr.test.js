@@ -258,6 +258,116 @@ describe('convertFAStoFSR — connector step', () => {
         const step = result.data[0].workflows[0].steps[0];
         expect(step.stepType).toBe(`/api/3/workflow_step_types/${CONNECTOR_STEP_TYPE_UUID}`);
     });
+
+    // Bug 1: connector rebuild must not drop `agent` or `pickFromTenant`.
+    it('preserves agent and pickFromTenant fields', () => {
+        const fas = makeFasCollection({
+            playbooks: [
+                makeSimplePlaybook({
+                    steps: [
+                        makeFasStep(STEP_START_UUID, 'Do Thing', CONNECTOR_STEP_TYPE_UUID, '30', '300', {
+                            connector: 'slack',
+                            operation: 'post_message',
+                            agent: 'tenant-default',
+                            pickFromTenant: true,
+                        }),
+                    ],
+                    routes: [],
+                }),
+            ],
+        });
+        const result = convert(fas);
+        const step = result.data[0].workflows[0].steps[0];
+        expect(step.arguments.agent).toBe('tenant-default');
+        expect(step.arguments.pickFromTenant).toBe(true);
+    });
+
+    // Bug 2: connector rebuild must not drop control-flow modifiers.
+    it('preserves ignore_errors, mock_result, apply_async, and step_variables', () => {
+        const fas = makeFasCollection({
+            playbooks: [
+                makeSimplePlaybook({
+                    steps: [
+                        makeFasStep(STEP_START_UUID, 'Do Thing', CONNECTOR_STEP_TYPE_UUID, '30', '300', {
+                            connector: 'slack',
+                            operation: 'post_message',
+                            ignore_errors: true,
+                            mock_result: { status: 'ok' },
+                            apply_async: true,
+                            step_variables: { input: { params: { foo: 'bar' } } },
+                        }),
+                    ],
+                    routes: [],
+                }),
+            ],
+        });
+        const result = convert(fas);
+        const step = result.data[0].workflows[0].steps[0];
+        expect(step.arguments.ignore_errors).toBe(true);
+        expect(step.arguments.mock_result).toEqual({ status: 'ok' });
+        expect(step.arguments.apply_async).toBe(true);
+        expect(step.arguments.step_variables).toEqual({ input: { params: { foo: 'bar' } } });
+    });
+
+    // Bug 3: step_variables should be omitted (not set to []) when absent from source.
+    it('omits step_variables instead of defaulting it to an empty array', () => {
+        const fas = makeFasCollection({
+            playbooks: [
+                makeSimplePlaybook({
+                    steps: [
+                        makeFasStep(STEP_START_UUID, 'Do Thing', CONNECTOR_STEP_TYPE_UUID, '30', '300', {
+                            connector: 'slack',
+                            operation: 'post_message',
+                        }),
+                    ],
+                    routes: [],
+                }),
+            ],
+        });
+        const result = convert(fas);
+        const step = result.data[0].workflows[0].steps[0];
+        expect('step_variables' in step.arguments).toBe(false);
+    });
+
+    // Bug 4: Utility/No-Op steps (UUID 0109f35d-...) also carry a `connector` field
+    // but must not be rebuilt with the connector shape.
+    it('does not rebuild Utility/No-Op steps as connectors', () => {
+        const NOOP_TYPE = '0109f35d-090b-4a2b-bd8a-94cbc3508562';
+        const fas = makeFasCollection({
+            playbooks: [
+                makeSimplePlaybook({
+                    steps: [
+                        makeFasStep(STEP_START_UUID, 'Display', NOOP_TYPE, '30', '300', {
+                            connector: 'utilities',
+                            operation: 'no_op',
+                            agent: 'tenant-default',
+                            pickFromTenant: true,
+                            config: 'original-config',
+                            params: {
+                                data: 'hello',
+                                display: 'markdown',
+                                show_button: true,
+                            },
+                        }),
+                    ],
+                    routes: [],
+                }),
+            ],
+        });
+        const result = convert(fas);
+        const step = result.data[0].workflows[0].steps[0];
+        // Connector-specific overrides (config blanked, from_str added) must NOT fire.
+        expect(step.arguments.config).toBe('original-config');
+        expect(step.arguments).not.toHaveProperty('from_str');
+        // No-Op-specific args must be preserved.
+        expect(step.arguments.agent).toBe('tenant-default');
+        expect(step.arguments.pickFromTenant).toBe(true);
+        expect(step.arguments.params).toEqual({
+            data: 'hello',
+            display: 'markdown',
+            show_button: true,
+        });
+    });
 });
 
 // ---------------------------------------------------------------------------

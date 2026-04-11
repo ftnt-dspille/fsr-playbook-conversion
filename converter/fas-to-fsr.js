@@ -173,19 +173,29 @@ function convertPlaybookToWorkflow(playbook, fsrCollection) {
                 });
             }
 
-            // Fix connector steps - ensure simplified structure for FSR
-            if (stepArguments.connector) {
+            // Fix connector-shaped steps for FSR. Guard by step type UUID so this
+            // does not also fire on Utility/No-Op (which carries a `connector` field
+            // but uses a different params shape).
+            if (isConnectorLikeStepType(stepType)) {
+                // Spread original args first so platform fields like `agent`,
+                // `pickFromTenant`, `ignore_errors`, `mock_result`, `apply_async`,
+                // and `step_variables` are preserved. Only override what FSR can't
+                // accept verbatim.
                 stepArguments = {
-                    name: stepArguments.name || stepArguments.connector.toUpperCase(),
+                    ...stepArguments,
                     // Config can't be passed cleanly.
                     config: '',
-                    version: stepArguments.version || '1.0.0',
-                    params: stepArguments.params || {},
-                    from_str: stepArguments.from_str || stepArguments.params?.from || '',
-                    connector: stepArguments.connector,
-                    operation: stepArguments.operation || '',
-                    step_variables: stepArguments.step_variables || []
+                    from_str: stepArguments.from_str || stepArguments.params?.from || ''
                 };
+                // Backfill required fields when missing from the source.
+                if (!stepArguments.name) {
+                    stepArguments.name = stepArguments.connector
+                        ? stepArguments.connector.toUpperCase()
+                        : '';
+                }
+                if (!stepArguments.version) stepArguments.version = '1.0.0';
+                if (!stepArguments.params) stepArguments.params = {};
+                if (!stepArguments.operation) stepArguments.operation = '';
             }
 
             const fsrStep = {

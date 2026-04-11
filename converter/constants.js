@@ -95,6 +95,19 @@ const SET_VARIABLE_STEP_TYPE = '04d0cf46-b6a8-42c4-8683-60a7eaa69e8f';
 // FAS Start/Trigger step type (referenced only)
 const FAS_START_STEP_TYPE = 'b348f017-9a94-471f-87f8-ce88b6a7ad62';
 
+// Step types whose arguments use the connector shape (connector/operation/params/from_str).
+// Excludes Utility/No-Op, which also carries a `connector` field but uses a different params shape.
+const CONNECTOR_LIKE_STEP_TYPES = {
+    '0bfed618-0316-11e7-93ae-92361f002671': 'Connector',
+    '4c0019b2-055c-44d0-968c-678a0c2d762e': 'Send Email',
+    '0bfed618-0316-11e7-93ae-92361f002675': 'Email',
+    '0bfed618-0316-11e7-93ae-92361f002674': 'Attachment'
+};
+
+function isConnectorLikeStepType(stepTypeUuid) {
+    return CONNECTOR_LIKE_STEP_TYPES.hasOwnProperty(stepTypeUuid);
+}
+
 function isUnsupportedStepType(stepTypeUuid) {
     return UNSUPPORTED_STEP_TYPES.hasOwnProperty(stepTypeUuid);
 }
