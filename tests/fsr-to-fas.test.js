@@ -330,6 +330,53 @@ describe('convertFSRtoFAS — manual input step_uuid fix', () => {
         expect(step.arguments.response_mapping.options[0].step_uuid)
             .toBe(`api/3/workflow_steps/${STEP_TARGET_UUID}`);
     });
+
+    // Bug 5: step_iri in manual input response_mapping options must also be de-prefixed.
+    it('removes leading slash from /api/3/workflow_steps/ step_iri', () => {
+        const fsr = makeFsrCollection({
+            workflows: [
+                makeSimpleWorkflow({
+                    steps: [
+                        makeStep(STEP_DECISION_UUID, 'User Input', MANUAL_INPUT_TYPE, {}, {
+                            response_mapping: {
+                                options: [
+                                    { step_iri: `/api/3/workflow_steps/${STEP_TARGET_UUID}`, option: 'OK' },
+                                ],
+                            },
+                        }),
+                    ],
+                    routes: [],
+                }),
+            ],
+        });
+        const result = convert(fsr);
+        const step = result.data[0].playbooks[0].steps[0];
+        expect(step.arguments.response_mapping.options[0].step_iri)
+            .toBe(`api/3/workflow_steps/${STEP_TARGET_UUID}`);
+    });
+
+    it('adds api/3/workflow_steps/ prefix to a bare UUID step_iri', () => {
+        const fsr = makeFsrCollection({
+            workflows: [
+                makeSimpleWorkflow({
+                    steps: [
+                        makeStep(STEP_DECISION_UUID, 'User Input', MANUAL_INPUT_TYPE, {}, {
+                            response_mapping: {
+                                options: [
+                                    { step_iri: STEP_TARGET_UUID, option: 'OK' },
+                                ],
+                            },
+                        }),
+                    ],
+                    routes: [],
+                }),
+            ],
+        });
+        const result = convert(fsr);
+        const step = result.data[0].playbooks[0].steps[0];
+        expect(step.arguments.response_mapping.options[0].step_iri)
+            .toBe(`api/3/workflow_steps/${STEP_TARGET_UUID}`);
+    });
 });
 
 // ---------------------------------------------------------------------------

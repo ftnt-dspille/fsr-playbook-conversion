@@ -221,6 +221,15 @@ function fixManualInputStepUUIDs(arguments) {
                     option.step_uuid = 'api/3/workflow_steps/' + option.step_uuid;
                 }
             }
+            // Same prefix normalization for step_iri — FSR options carry step_iri
+            // (sometimes alongside step_uuid). Without this it retains the FSR prefix.
+            if (option.step_iri && typeof option.step_iri === 'string') {
+                if (option.step_iri.startsWith('/api/3/workflow_steps/')) {
+                    option.step_iri = option.step_iri.substring(1);
+                } else if (!option.step_iri.startsWith('api/3/workflow_steps/')) {
+                    option.step_iri = 'api/3/workflow_steps/' + option.step_iri;
+                }
+            }
         });
     }
 
