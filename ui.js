@@ -90,6 +90,36 @@ fileInput.addEventListener('change', (e) => {
     if (file) loadFile(file);
 });
 
+function runConversion() {
+    try {
+        const input = inputText.value.trim();
+        if (!input) {
+            showStatus('Please provide input JSON', 'error');
+            return;
+        }
+
+        let result;
+        if (currentDirection === 'fsr-to-fas') {
+            result = convertFSRtoFAS(input);
+        } else {
+            result = convertFAStoFSR(input);
+        }
+
+        const output = JSON.stringify(result, null, 2);
+        outputText.value = output;
+
+        downloadBtn.disabled = false;
+        copyBtn.disabled = false;
+
+        updateStats(result, currentDirection);
+        showConversionInfo(result, currentDirection);
+        showStatus('✅ Conversion successful!', 'success');
+    } catch (error) {
+        showStatus('❌ Conversion error: ' + error.message, 'error');
+        console.error(error);
+    }
+}
+
 function loadFile(file) {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -101,8 +131,8 @@ function loadFile(file) {
             // Auto-detect format
             const detectedInfo = detectFormat(data);
             if (detectedInfo) {
-                showStatus(`✅ File loaded! Detected format: ${detectedInfo.format.toUpperCase()}`, 'success');
                 autoSetDirection(detectedInfo);
+                runConversion();
             } else {
                 showStatus('⚠️ File loaded but format could not be detected', 'info');
             }
@@ -232,35 +262,7 @@ function debounce(func, wait) {
 }
 
 // Convert button
-convertBtn.addEventListener('click', () => {
-    try {
-        const input = inputText.value.trim();
-        if (!input) {
-            showStatus('Please provide input JSON', 'error');
-            return;
-        }
-
-        let result;
-        if (currentDirection === 'fsr-to-fas') {
-            result = convertFSRtoFAS(input);
-        } else {
-            result = convertFAStoFSR(input);
-        }
-
-        const output = JSON.stringify(result, null, 2);
-        outputText.value = output;
-
-        downloadBtn.disabled = false;
-        copyBtn.disabled = false;
-
-        updateStats(result, currentDirection);
-        showConversionInfo(result, currentDirection);
-        showStatus('✅ Conversion successful!', 'success');
-    } catch (error) {
-        showStatus('❌ Conversion error: ' + error.message, 'error');
-        console.error(error);
-    }
-});
+convertBtn.addEventListener('click', runConversion);
 
 // Download button
 downloadBtn.addEventListener('click', () => {
