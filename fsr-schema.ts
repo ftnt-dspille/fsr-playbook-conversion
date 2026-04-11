@@ -2,7 +2,7 @@
  * Auto-generated step-type schema
  * Source    : all_fsr_evoke_playbooks.json
  * Type      : workflow_collections
- * Generated : 2026-04-11T17:46:19.161Z
+ * Generated : 2026-04-11T19:47:03.711Z
  * Collections: 119  |  Total steps: 6618  |  Step types: 21
  * Mode      : default (low-frequency keys collapsed into [key: string]: unknown)
  *
@@ -177,23 +177,21 @@ export const STEP_TYPE_CLASSIFICATIONS: Record<string, StepTypeClassification> =
     occurrences: 150,
     playbookCount: 102,
   },
-  // ⚠ UNCLASSIFIED — fill in below
+  // Approval
   'a19333c2-c822-11ed-afa1-0242ac120002': {
-    // TODO: classify — set name, label, and category
     uuid: 'a19333c2-c822-11ed-afa1-0242ac120002',
-    name: 'Unknown',
-    label: 'a19333c2-c822-11ed-afa1-0242ac120002',
-    category: 'unknown',
+    name: 'Approval',
+    label: 'Approval',
+    category: 'action',
     occurrences: 3,
     playbookCount: 3,
   },
-  // ⚠ UNCLASSIFIED — fill in below
+  // Create Task
   'dc6ac63d-c5a5-472f-9eb4-6b18473a98b8': {
-    // TODO: classify — set name, label, and category
     uuid: 'dc6ac63d-c5a5-472f-9eb4-6b18473a98b8',
-    name: 'Unknown',
-    label: 'dc6ac63d-c5a5-472f-9eb4-6b18473a98b8',
-    category: 'unknown',
+    name: 'Create Task',
+    label: 'Create Task',
+    category: 'action',
     occurrences: 6,
     playbookCount: 3,
   },
@@ -215,13 +213,12 @@ export const STEP_TYPE_CLASSIFICATIONS: Record<string, StepTypeClassification> =
     occurrences: 24,
     playbookCount: 20,
   },
-  // ⚠ UNCLASSIFIED — fill in below
+  // Set API Keys
   'b104e839-fc31-48b3-8c50-7e9433f33d79': {
-    // TODO: classify — set name, label, and category
     uuid: 'b104e839-fc31-48b3-8c50-7e9433f33d79',
-    name: 'Unknown',
-    label: 'b104e839-fc31-48b3-8c50-7e9433f33d79',
-    category: 'unknown',
+    name: 'Set API Keys',
+    label: 'Set API Keys',
+    category: 'utility',
     occurrences: 2,
     playbookCount: 2,
   },
@@ -1126,13 +1123,12 @@ export interface ManualInputArgs {
 }
 
 /**
- * a19333c2-c822-11ed-afa1-0242ac120002
+ * Approval
  * UUID     : a19333c2-c822-11ed-afa1-0242ac120002
- * Category : unknown
+ * Category : action
  * Instances: 3 step(s) across 3 playbook(s)
- * TODO: classify this step type
  */
-export interface StepArgs_a19333c2_c822_11ed_afa1_0242ac120002 {
+export interface ApprovalArgs {
   agent_id: null;
   custom_email_body_external: null;
   customEmailExternal: boolean;
@@ -1183,13 +1179,12 @@ export interface StepArgs_a19333c2_c822_11ed_afa1_0242ac120002 {
 }
 
 /**
- * dc6ac63d-c5a5-472f-9eb4-6b18473a98b8
+ * Create Task
  * UUID     : dc6ac63d-c5a5-472f-9eb4-6b18473a98b8
- * Category : unknown
+ * Category : action
  * Instances: 6 step(s) across 3 playbook(s)
- * TODO: classify this step type
  */
-export interface StepArgs_dc6ac63d_c5a5_472f_9eb4_6b18473a98b8 {
+export interface Create TaskArgs {
   collection: string;
   resource: {
     assignedToPerson: (string | {
@@ -1340,13 +1335,12 @@ export interface CodeSnippetArgs {
 }
 
 /**
- * b104e839-fc31-48b3-8c50-7e9433f33d79
+ * Set API Keys
  * UUID     : b104e839-fc31-48b3-8c50-7e9433f33d79
- * Category : unknown
+ * Category : utility
  * Instances: 2 step(s) across 2 playbook(s)
- * TODO: classify this step type
  */
-export interface StepArgs_b104e839_fc31_48b3_8c50_7e9433f33d79 {
+export interface Set API KeysArgs {
   private_key: string;
   public_key: string;
 }
@@ -1372,11 +1366,11 @@ export type AnyStepArgs =
   | IngestBulkFeedArgs
   | SendEmailArgs
   | ManualInputArgs
-  | StepArgs_a19333c2_c822_11ed_afa1_0242ac120002
-  | StepArgs_dc6ac63d_c5a5_472f_9eb4_6b18473a98b8
+  | ApprovalArgs
+  | Create TaskArgs
   | APIEndpointArgs
   | CodeSnippetArgs
-  | StepArgs_b104e839_fc31_48b3_8c50_7e9433f33d79;
+  | Set API KeysArgs;
 
 // ============================================================
 // 4. Playbook & Step Structural Interfaces
